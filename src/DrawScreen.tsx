@@ -91,6 +91,14 @@ export function DrawScreen({
           <Banner />
           <div className="draw-body">
             <div className={drawing ? 'solo-card is-drawing' : 'solo-card'}>
+              <span className="solo-ambient" aria-hidden="true">
+                <span className="ambient-pool" />
+                <span className="ambient-ring" />
+                <span className="ambient-ring ambient-ring-inner" />
+                {ORBIT.map((star) => (
+                  <span key={star} className="ambient-star" style={{ '--i': star } as CSSProperties} />
+                ))}
+              </span>
               {drawing ? (
                 <span className="draw-fx" aria-hidden="true">
                   <span className="fx-pillar" />

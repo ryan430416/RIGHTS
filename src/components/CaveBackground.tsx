@@ -21,6 +21,22 @@ export function CaveBackground() {
         <polygon points="70,90 120,230 92,410 24,270" fill="#1d4ed8" opacity="0.6" />
         <polygon points="130,280 188,390 150,510 96,400" fill="#93c5fd" opacity="0.4" />
       </svg>
+      <svg className="crystal crystal-top" viewBox="0 0 180 240">
+        <polygon points="90,8 132,90 108,210 48,120" fill="#93c5fd" opacity="0.55" />
+        <polygon points="40,40 78,120 58,220 12,130" fill="#1d4ed8" opacity="0.4" />
+      </svg>
+      <svg className="ruin ruin-left" viewBox="0 0 220 280">
+        <path d="M20 270 V90 H70 V40 H110 V110 H160 V270" fill="none" stroke="#1d3358" strokeWidth="10" />
+        <path d="M40 270 V140 H90 V80" fill="none" stroke="#24406e" strokeWidth="6" />
+      </svg>
+      <svg className="ruin ruin-right" viewBox="0 0 220 280">
+        <path d="M30 270 V120 H80 V50 H130 V150 H190 V270" fill="none" stroke="#1d3358" strokeWidth="10" />
+        <circle cx="150" cy="70" r="22" fill="none" stroke="#c9a35a" strokeWidth="2" opacity="0.7" />
+      </svg>
+      <svg className="stream stream-floor" viewBox="0 0 1200 160" preserveAspectRatio="none">
+        <path d="M0 90 C 180 20, 320 140, 520 70 S 860 20, 1200 80" />
+        <path d="M0 120 C 240 60, 420 150, 680 90 S 980 40, 1200 110" />
+      </svg>
       <svg className="stream stream-left" viewBox="0 0 280 640">
         <path d="M40 600 C 90 470, 30 390, 120 300 S 70 140, 160 40" />
         <path d="M90 620 C 150 500, 80 360, 170 250" />

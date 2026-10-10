@@ -81,10 +81,11 @@ h1 {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse 16% 28% at 7% 72%, rgba(59, 130, 246, 0.28), transparent 70%),
-    radial-gradient(ellipse 14% 24% at 94% 64%, rgba(37, 99, 235, 0.26), transparent 72%),
-    radial-gradient(ellipse 42% 36% at 50% 46%, rgba(18, 42, 82, 0.18), transparent 68%),
-    linear-gradient(180deg, #08111f 0%, #10213d 46%, #08111d 100%);
+    radial-gradient(ellipse 22% 18% at 50% 58%, rgba(212, 168, 74, 0.16), transparent 70%),
+    radial-gradient(ellipse 18% 30% at 6% 68%, rgba(59, 130, 246, 0.38), transparent 70%),
+    radial-gradient(ellipse 16% 26% at 94% 60%, rgba(37, 99, 235, 0.34), transparent 72%),
+    radial-gradient(ellipse 28% 22% at 50% 0%, rgba(30, 64, 140, 0.35), transparent 70%),
+    linear-gradient(180deg, #07101f 0%, #14305c 42%, #0a1730 100%);
 }
 
 .cave-vignette {
@@ -138,6 +139,31 @@ h1 {
   bottom: 6vh;
 }
 
+.crystal-top {
+  top: -2vh;
+  right: 8vw;
+  width: min(160px, 14vw);
+}
+
+.ruin {
+  position: absolute;
+  bottom: 6vh;
+  width: min(260px, 22vw);
+  height: auto;
+  opacity: 0.85;
+}
+
+.ruin-left { left: 1vw; }
+.ruin-right { right: 1vw; }
+
+.stream-floor {
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 18vh;
+}
+
 .stream {
   position: absolute;
   width: min(260px, 22vw);
@@ -176,8 +202,53 @@ h1 {
 }
 
 .banner {
+  position: relative;
   text-align: center;
   padding-top: 0.2rem;
+}
+
+.banner-flank {
+  position: absolute;
+  left: 50%;
+  top: 52px;
+  width: min(760px, 86vw);
+  height: 1px;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.banner-flare,
+.banner-flare-right {
+  position: absolute;
+  top: 0;
+  width: 38%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(230, 197, 106, 0.85));
+}
+
+.banner-flare { left: 0; }
+.banner-flare-right {
+  right: 0;
+  transform: scaleX(-1);
+}
+
+.banner-diamond {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  background: #e6c56a;
+  transform: translate(-50%, -50%) rotate(45deg);
+  box-shadow: 14px 0 0 #e6c56a, -14px 0 0 #e6c56a;
+}
+
+.banner-compass,
+.banner h1,
+.banner-subtitle,
+.banner-english {
+  position: relative;
+  z-index: 1;
 }
 
 .banner-compass {
@@ -234,6 +305,56 @@ h1 {
 .solo-card {
   position: relative;
   width: min(400px, 72vw, 46vh);
+}
+
+.solo-ambient {
+  position: absolute;
+  inset: -24%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.ambient-pool {
+  position: absolute;
+  left: 50%;
+  bottom: 2%;
+  width: 150%;
+  height: 34%;
+  transform: translateX(-50%);
+  background: radial-gradient(ellipse, rgba(232, 190, 92, 0.38), transparent 68%);
+  filter: blur(6px);
+}
+
+.ambient-ring {
+  position: absolute;
+  inset: 6%;
+  border-radius: 50%;
+  border: 1px solid rgba(230, 197, 106, 0.38);
+  background:
+    repeating-conic-gradient(from 0deg, rgba(230, 197, 106, 0.28) 0deg 2deg, transparent 2deg 18deg);
+  mask-image: radial-gradient(circle, transparent 62%, #000 64%, #000 68%, transparent 70%);
+  animation: spin 28s linear infinite;
+}
+
+.ambient-ring-inner {
+  inset: 16%;
+  opacity: 0.7;
+  animation-duration: 18s;
+  animation-direction: reverse;
+}
+
+.ambient-star {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  margin: -3px;
+  background: #f6e3a8;
+  box-shadow: 0 0 8px rgba(246, 220, 150, 0.8);
+  transform: rotate(calc(var(--i) * 45deg)) translateY(-168px) rotate(45deg);
+  animation: twinkle 3.6s ease-in-out infinite;
+  animation-delay: calc(var(--i) * 0.25s);
 }
 
 .card-button {
@@ -664,6 +785,8 @@ h1 {
 
 @media (prefers-reduced-motion: reduce) {
   .stream path,
+  .ambient-ring,
+  .ambient-star,
   .card-shimmer,
   .result,
   .result-halo,
@@ -747,6 +870,12 @@ h1 {
   0% { opacity: 0; transform: translateX(-50%) scaleY(0.4); }
   35% { opacity: 0.85; transform: translateX(-50%) scaleY(1); }
   100% { opacity: 0.2; transform: translateX(-50%) scaleY(1.08); }
+}
+
+@keyframes twinkle {
+  0%,
+  100% { opacity: 0.35; }
+  50% { opacity: 1; }
 }
 
 @keyframes glowpulse {
