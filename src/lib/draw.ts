@@ -1,4 +1,4 @@
-export const REVEAL_DURATION_MS = 2000
+export const REVEAL_DURATION_MS = 2800
 
 export type DrawPhase = 'select' | 'revealing' | 'result'
 

@@ -32,12 +32,12 @@ describe('DrawScreen', () => {
     fireEvent.click(card)
     fireEvent.click(card)
 
-    expect(screen.queryByRole('button', { name: '下一位' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '確認' })).not.toBeInTheDocument()
 
     await act(async () => {
       await vi.advanceTimersByTimeAsync(1999)
     })
-    expect(screen.queryByRole('button', { name: '下一位' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '確認' })).not.toBeInTheDocument()
 
     await act(async () => {
       await vi.advanceTimersByTimeAsync(1)
@@ -46,7 +46,7 @@ describe('DrawScreen', () => {
     expect(screen.getAllByRole('img', { name: '卡片1' })).toHaveLength(1)
     expect(screen.queryByRole('img', { name: '卡片2' })).not.toBeInTheDocument()
     expect(screen.queryByRole('heading', { name: '權流・溯源' })).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '下一位' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '確認' })).toBeInTheDocument()
   })
 
   it('keeps the result after the reveal timer and does not draw again', async () => {
@@ -81,7 +81,7 @@ describe('DrawScreen', () => {
     })
     expect(screen.getByRole('img', { name: '卡片1' })).toBeInTheDocument()
 
-    fireEvent.click(screen.getByRole('button', { name: '下一位' }))
+    fireEvent.click(screen.getByRole('button', { name: '確認' }))
     expect(screen.getByText('點選卡牌，開啟你的權益旅程。')).toBeInTheDocument()
     expect(screen.getAllByRole('button', { name: '選擇卡牌' })).toHaveLength(1)
     expect(document.querySelectorAll('img')).toHaveLength(0)
@@ -105,6 +105,6 @@ describe('DrawScreen', () => {
     fireEvent.error(image!)
 
     expect(screen.getByRole('img', { name: '卡片1' })).toHaveTextContent('圖片尚未載入')
-    expect(screen.getByRole('button', { name: '下一位' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '確認' })).toBeInTheDocument()
   })
 })

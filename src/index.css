@@ -299,11 +299,35 @@ h1 {
   animation: spin var(--reveal-ms) linear;
 }
 
+.solo-card .card-button {
+  z-index: 1;
+}
+
 .draw-fx {
   position: absolute;
-  inset: -18%;
+  inset: -28%;
   pointer-events: none;
   z-index: 0;
+}
+
+.fx-pillar {
+  position: absolute;
+  left: 50%;
+  top: -12%;
+  width: 22%;
+  height: 124%;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, transparent, rgba(246, 220, 150, 0.42), transparent);
+  filter: blur(8px);
+  animation: pillar var(--reveal-ms) ease;
+}
+
+.fx-glow {
+  position: absolute;
+  inset: 16%;
+  border-radius: 46%;
+  background: radial-gradient(circle, rgba(246, 220, 150, 0.42), transparent 68%);
+  animation: glowpulse var(--reveal-ms) ease;
 }
 
 .fx-rays {
@@ -328,8 +352,40 @@ h1 {
   animation: ring var(--reveal-ms) ease forwards;
 }
 
+.fx-rays-reverse {
+  animation-direction: reverse;
+  opacity: 0.4;
+}
+
+.fx-orbit {
+  position: absolute;
+  inset: 4%;
+  animation: spin var(--reveal-ms) linear;
+}
+
+.fx-orbit-star {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 9px;
+  height: 9px;
+  margin: -4px;
+  background: #f8e7b4;
+  box-shadow: 0 0 8px rgba(246, 220, 150, 0.65);
+  transform: rotate(calc(var(--i) * 45deg)) translateY(-158px) rotate(45deg);
+}
+
 .fx-ring-late {
-  animation-delay: calc(var(--reveal-ms) * 0.28);
+  animation-delay: calc(var(--reveal-ms) * 0.22);
+}
+
+.fx-ring-last {
+  animation-delay: calc(var(--reveal-ms) * 0.48);
+}
+
+.fx-gather {
+  background: #d7ecff;
+  animation-name: gather;
 }
 
 .fx-mote {
@@ -499,17 +555,33 @@ h1 {
   animation: rise 0.45s ease;
 }
 
+.result-stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+
 .result-halo {
   position: absolute;
-  width: min(78vh, 760px);
-  height: min(78vh, 760px);
+  width: min(92vw, 860px);
+  height: min(92vw, 860px);
   border-radius: 50%;
   background:
-    radial-gradient(circle, rgba(246, 220, 150, 0.28), transparent 62%),
-    repeating-conic-gradient(from 0deg, rgba(246, 220, 150, 0.16) 0deg 8deg, transparent 8deg 30deg);
-  mask-image: radial-gradient(circle, transparent 24%, #000 48%, transparent 72%);
-  animation: spin 18s linear infinite;
+    radial-gradient(circle, rgba(246, 220, 150, 0.3), transparent 58%),
+    repeating-conic-gradient(from 0deg, rgba(246, 220, 150, 0.2) 0deg 6deg, transparent 6deg 24deg);
+  mask-image: radial-gradient(circle, transparent 18%, #000 42%, transparent 72%);
+  animation: spin 16s linear infinite;
   pointer-events: none;
+}
+
+.result-sparks {
+  position: absolute;
+  inset: -30%;
+  pointer-events: none;
+}
+
+.result-sparks .fx-mote {
+  animation-duration: 1.8s;
 }
 
 .next-button,
@@ -598,9 +670,13 @@ h1 {
   .card-tilt,
   .card-inner,
   .card-back-compass,
+  .fx-pillar,
+  .fx-glow,
   .fx-rays,
+  .fx-orbit,
   .fx-ring,
   .fx-mote,
+  .result-sparks,
   .prompt {
     animation: none !important;
     transition: none !important;
@@ -657,5 +733,24 @@ h1 {
 @keyframes mote {
   0% { transform: rotate(calc(var(--i) * 30deg)) translateY(20px) scale(0.4); opacity: 0; }
   25% { opacity: 0.9; }
-  100% { transform: rotate(calc(var(--i) * 30deg)) translateY(190px) scale(1); opacity: 0; }
+  100% { transform: rotate(calc(var(--i) * 30deg)) translateY(210px) scale(1); opacity: 0; }
+}
+
+@keyframes gather {
+  0% { transform: rotate(calc(var(--i) * 30deg)) translateY(220px) scale(0.6); opacity: 0; }
+  18% { opacity: 0.85; }
+  58% { transform: rotate(calc(var(--i) * 30deg + 50deg)) translateY(8px) scale(0.3); opacity: 0.35; }
+  100% { opacity: 0; }
+}
+
+@keyframes pillar {
+  0% { opacity: 0; transform: translateX(-50%) scaleY(0.4); }
+  35% { opacity: 0.85; transform: translateX(-50%) scaleY(1); }
+  100% { opacity: 0.2; transform: translateX(-50%) scaleY(1.08); }
+}
+
+@keyframes glowpulse {
+  0% { opacity: 0.15; transform: scale(0.75); }
+  42% { opacity: 0.72; transform: scale(1.04); }
+  100% { opacity: 0.28; transform: scale(1.18); }
 }

@@ -15,6 +15,7 @@ type DrawScreenProps = {
 }
 
 const MOTES = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+const ORBIT = [0, 1, 2, 3, 4, 5, 6, 7]
 
 export function DrawScreen({
   random,
@@ -72,10 +73,17 @@ export function DrawScreen({
       </p>
       {phase === 'result' && drawn ? (
         <section className="result" aria-label="抽卡結果">
-          <div className="result-halo" aria-hidden="true" />
-          <CharacterCard card={drawn} prominent />
+          <div className="result-stage">
+            <div className="result-halo" aria-hidden="true" />
+            <span className="result-sparks" aria-hidden="true">
+              {MOTES.map((mote) => (
+                <span key={mote} className="fx-mote" style={{ '--i': mote } as CSSProperties} />
+              ))}
+            </span>
+            <CharacterCard card={drawn} prominent />
+          </div>
           <button ref={nextRef} type="button" className="next-button" onClick={reset}>
-            下一位
+            確認
           </button>
         </section>
       ) : (
@@ -85,9 +93,21 @@ export function DrawScreen({
             <div className={drawing ? 'solo-card is-drawing' : 'solo-card'}>
               {drawing ? (
                 <span className="draw-fx" aria-hidden="true">
+                  <span className="fx-pillar" />
+                  <span className="fx-glow" />
                   <span className="fx-rays" />
+                  <span className="fx-rays fx-rays-reverse" />
+                  <span className="fx-orbit">
+                    {ORBIT.map((star) => (
+                      <span key={star} className="fx-orbit-star" style={{ '--i': star } as CSSProperties} />
+                    ))}
+                  </span>
                   <span className="fx-ring" />
                   <span className="fx-ring fx-ring-late" />
+                  <span className="fx-ring fx-ring-last" />
+                  {MOTES.map((mote) => (
+                    <span key={`gather-${mote}`} className="fx-mote fx-gather" style={{ '--i': mote } as CSSProperties} />
+                  ))}
                   {MOTES.map((mote) => (
                     <span key={mote} className="fx-mote" style={{ '--i': mote } as CSSProperties} />
                   ))}
