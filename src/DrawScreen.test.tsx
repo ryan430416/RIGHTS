@@ -24,7 +24,7 @@ describe('DrawScreen', () => {
     expect(screen.getAllByRole('button', { name: '選擇卡牌' })).toHaveLength(1)
     expect(document.querySelectorAll('img')).toHaveLength(0)
     expect(screen.getByRole('button', { name: '全螢幕' })).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: '下一位' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '確認' })).not.toBeInTheDocument()
   })
 
   it('locks the first click and reveals the next character', async () => {
@@ -35,7 +35,7 @@ describe('DrawScreen', () => {
     fireEvent.click(card)
     fireEvent.click(card)
 
-    expect(screen.queryByRole('button', { name: '下一位' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '確認' })).not.toBeInTheDocument()
     await act(async () => {
       await vi.advanceTimersByTimeAsync(2000)
     })
@@ -55,7 +55,7 @@ describe('DrawScreen', () => {
     })
     const savedRound = store.read()?.round
 
-    fireEvent.click(screen.getByRole('button', { name: '下一位' }))
+    fireEvent.click(screen.getByRole('button', { name: '確認' }))
     expect(screen.getAllByRole('button', { name: '選擇卡牌' })).toHaveLength(1)
     expect(document.querySelectorAll('img')).toHaveLength(0)
     expect(store.read()).toMatchObject({ round: savedRound, nextIndex: 1, result: null })
@@ -80,7 +80,7 @@ describe('DrawScreen', () => {
 
     render(<DrawScreen random={() => 0} store={store} />)
     expect(screen.getByRole('img', { name: '卡片1' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '下一位' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '確認' })).toBeInTheDocument()
     expect(store.read()).toEqual(progress)
   })
 })

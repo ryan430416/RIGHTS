@@ -100,7 +100,7 @@ export function DrawScreen({
             <CharacterCard card={drawn} prominent />
           </div>
           <button ref={nextRef} type="button" className="next-button" onClick={returnToSelect}>
-            下一位
+            確認
           </button>
         </section>
       ) : (
