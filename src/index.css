@@ -400,24 +400,51 @@ h1 {
   display: grid;
 }
 
-.solo-card.is-drawing .card-button {
+.card-grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(0.75rem, 2vw, 1.75rem);
+  width: min(1240px, 100%);
+}
+
+.card-grid .solo-ambient {
+  inset: -8% -4%;
+}
+
+.solo-card.is-drawing .card-button,
+.card-button.is-drawing,
+.card-grid.is-locked .card-button {
   pointer-events: none;
 }
 
-.solo-card:not(.is-drawing) .card-tilt {
+.solo-card:not(.is-drawing) .card-tilt,
+.card-grid .card-button:not(.is-drawing):not(.is-dimmed) .card-tilt {
   animation: float 4.8s ease-in-out infinite;
 }
 
-.solo-card.is-drawing .card-tilt {
+.solo-card.is-drawing .card-tilt,
+.card-button.is-drawing .card-tilt {
   animation: lift var(--reveal-ms) ease forwards;
 }
 
-.solo-card.is-drawing .card-inner {
+.solo-card.is-drawing .card-inner,
+.card-button.is-drawing .card-inner {
   animation: flip var(--reveal-ms) ease forwards;
 }
 
-.solo-card.is-drawing .card-back-compass {
+.solo-card.is-drawing .card-back-compass,
+.card-button.is-drawing .card-back-compass {
   animation: spin var(--reveal-ms) linear;
+}
+
+.card-button.is-drawing {
+  z-index: 2;
+}
+
+.card-button.is-dimmed {
+  opacity: 0;
+  transition: opacity var(--reveal-ms) ease;
 }
 
 .solo-card .card-button {
@@ -770,6 +797,12 @@ h1 {
 @media (max-width: 900px) {
   .banner {
     padding-top: 2.8rem;
+  }
+
+  .card-grid {
+    grid-template-columns: repeat(2, minmax(140px, 220px));
+    justify-content: center;
+    width: min(520px, 100%);
   }
 }
 

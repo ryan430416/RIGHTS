@@ -2,109 +2,85 @@ import { act, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from './App.tsx'
 import { DrawScreen } from './DrawScreen.tsx'
+import { createProgress, drawAt, memoryProgressStore, PROGRESS_STORAGE_KEY } from './lib/progress.ts'
 
-const stay = () => 0.999999
+const identity = () => 0.999999
 
 describe('DrawScreen', () => {
   beforeEach(() => {
     vi.useFakeTimers()
+    localStorage.clear()
   })
 
   afterEach(() => {
     vi.useRealTimers()
+    localStorage.clear()
   })
 
-  it('shows one card back and the opening prompt', () => {
+  it('shows four card backs and no assigned characters', () => {
     render(<App />)
     expect(screen.getByRole('heading', { name: '權流・溯源' })).toBeInTheDocument()
-    expect(screen.getByText('溯其源，知其權')).toBeInTheDocument()
-    expect(screen.getByText('TRACE THE SOURCE. KNOW YOUR RIGHTS.')).toBeInTheDocument()
-    expect(screen.getByText('點選卡牌，開啟你的權益旅程。')).toBeInTheDocument()
-    expect(screen.getAllByRole('button', { name: '選擇卡牌' })).toHaveLength(1)
+    expect(screen.getByText('選擇一張卡牌，開啟你的權益旅程。')).toBeInTheDocument()
+    expect(screen.getAllByRole('button', { name: /選擇第/ })).toHaveLength(4)
     expect(document.querySelectorAll('img')).toHaveLength(0)
     expect(screen.getByRole('button', { name: '全螢幕' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '下一位' })).not.toBeInTheDocument()
   })
 
-  it('locks the round on the first pick and reveals that same card', async () => {
-    render(<DrawScreen random={stay} revealDurationMs={2000} />)
-    const card = screen.getByRole('button', { name: '選擇卡牌' })
-    fireEvent.click(card)
-    fireEvent.click(card)
-    fireEvent.click(card)
+  it('locks the first click and reveals the next character at the chosen position', async () => {
+    const store = memoryProgressStore()
+    render(<DrawScreen random={identity} revealDurationMs={2000} store={store} />)
+    const cards = screen.getAllByRole('button', { name: /選擇第/ })
+    fireEvent.click(cards[2]!)
+    fireEvent.click(cards[2]!)
+    fireEvent.click(cards[0]!)
 
-    expect(screen.queryByRole('button', { name: '確認' })).not.toBeInTheDocument()
-
+    expect(screen.queryByRole('button', { name: '下一位' })).not.toBeInTheDocument()
     await act(async () => {
-      await vi.advanceTimersByTimeAsync(1999)
-    })
-    expect(screen.queryByRole('button', { name: '確認' })).not.toBeInTheDocument()
-
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(1)
+      await vi.advanceTimersByTimeAsync(2000)
     })
 
-    expect(screen.getAllByRole('img', { name: '卡片1' })).toHaveLength(1)
-    expect(screen.queryByRole('img', { name: '卡片2' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('heading', { name: '權流・溯源' })).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '確認' })).toBeInTheDocument()
-  })
-
-  it('keeps the result after the reveal timer and does not draw again', async () => {
-    let calls = 0
-    const random = () => {
-      calls += 1
-      return 0.999999
-    }
-    render(<DrawScreen random={random} revealDurationMs={2000} />)
-    expect(calls).toBe(3)
-
-    const card = screen.getByRole('button', { name: '選擇卡牌' })
-    fireEvent.click(card)
-    fireEvent.click(card)
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(5000)
-    })
-
-    expect(calls).toBe(3)
     expect(screen.getByRole('img', { name: '卡片1' })).toBeInTheDocument()
+    expect(screen.queryByRole('img', { name: '卡片2' })).not.toBeInTheDocument()
+    expect(store.read()?.result).toEqual({ character: 'A', position: 2 })
+    expect(store.read()?.nextIndex).toBe(1)
   })
 
-  it('reshuffles when the next person starts', async () => {
-    const values = [0.999999, 0.999999, 0.999999, 0, 0, 0]
-    let index = 0
-    const random = () => values[index++] ?? 0.999999
-    render(<DrawScreen random={random} revealDurationMs={0} />)
-
-    fireEvent.click(screen.getByRole('button', { name: '選擇卡牌' }))
+  it('returns to the backs without reshuffling or drawing again', async () => {
+    const store = memoryProgressStore()
+    const view = render(<DrawScreen random={identity} revealDurationMs={0} store={store} />)
+    fireEvent.click(screen.getAllByRole('button', { name: /選擇第/ })[1]!)
     await act(async () => {
       await vi.advanceTimersByTimeAsync(0)
     })
-    expect(screen.getByRole('img', { name: '卡片1' })).toBeInTheDocument()
+    const savedRound = store.read()?.round
 
-    fireEvent.click(screen.getByRole('button', { name: '確認' }))
-    expect(screen.getByText('點選卡牌，開啟你的權益旅程。')).toBeInTheDocument()
-    expect(screen.getAllByRole('button', { name: '選擇卡牌' })).toHaveLength(1)
+    fireEvent.click(screen.getByRole('button', { name: '下一位' }))
+    expect(screen.getAllByRole('button', { name: /選擇第/ })).toHaveLength(4)
     expect(document.querySelectorAll('img')).toHaveLength(0)
+    expect(store.read()).toMatchObject({ round: savedRound, nextIndex: 1, result: null })
 
-    fireEvent.click(screen.getByRole('button', { name: '選擇卡牌' }))
+    fireEvent.click(screen.getAllByRole('button', { name: /選擇第/ })[0]!)
     await act(async () => {
       await vi.advanceTimersByTimeAsync(0)
     })
     expect(screen.getByRole('img', { name: '卡片2' })).toBeInTheDocument()
+
+    view.unmount()
+    render(<DrawScreen random={identity} revealDurationMs={0} store={store} />)
+    expect(screen.getByRole('img', { name: '卡片2' })).toBeInTheDocument()
+    expect(store.read()?.nextIndex).toBe(2)
+    expect(screen.queryByRole('img', { name: '卡片3' })).not.toBeInTheDocument()
   })
 
-  it('shows the placeholder when a card image fails and still completes the draw', async () => {
-    render(<DrawScreen random={stay} revealDurationMs={0} />)
-    fireEvent.click(screen.getByRole('button', { name: '選擇卡牌' }))
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(0)
-    })
+  it('continues the saved result when the page reloads during the reveal', () => {
+    const progress = drawAt(createProgress(identity), 3, identity)
+    const store = memoryProgressStore(progress)
+    localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify(progress))
 
-    const image = document.querySelector('img')
-    expect(image).not.toBeNull()
-    fireEvent.error(image!)
-
-    expect(screen.getByRole('img', { name: '卡片1' })).toHaveTextContent('圖片尚未載入')
-    expect(screen.getByRole('button', { name: '確認' })).toBeInTheDocument()
+    render(<DrawScreen random={() => 0} store={store} />)
+    expect(screen.getByRole('img', { name: '卡片1' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '下一位' })).toBeInTheDocument()
+    expect(store.read()).toEqual(progress)
   })
 })
