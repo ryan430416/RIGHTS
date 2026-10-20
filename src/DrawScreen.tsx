@@ -79,14 +79,23 @@ export function DrawScreen({
   }, [phase])
 
   function draw() {
-    if (!canDraw(phase, locked.current, isLeader)) return
+    if (!canDraw(phase, locked.current, isLeader) || progressRef.current.result) return
     locked.current = true
-    const base = progressRef.current.result ? clearResult(progressRef.current) : progressRef.current
-    const next = commitDraw(base, random)
+    const next = commitDraw(progressRef.current, random)
     progressRef.current = next
     store.write(next)
     setProgress(next)
     setPhase('summoning')
+  }
+
+  function confirm() {
+    if (!isLeader || phase !== 'result') return
+    locked.current = false
+    const next = clearResult(progressRef.current)
+    progressRef.current = next
+    store.write(next)
+    setProgress(next)
+    setPhase('home')
   }
 
   const style = { '--reveal-ms': `${duration}ms` } as CSSProperties
@@ -155,9 +164,9 @@ export function DrawScreen({
             type="button"
             className="action-button"
             disabled={!isLeader}
-            onClick={draw}
+            onClick={confirm}
           >
-            再抽一次
+            確定
           </button>
         </section>
       ) : null}

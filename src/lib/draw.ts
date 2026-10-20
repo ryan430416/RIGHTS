@@ -26,5 +26,5 @@ export function shuffleCards<T>(cards: readonly T[], random: () => number = defa
 }
 
 export function canDraw(phase: DrawPhase, locked: boolean, isLeader: boolean): boolean {
-  return isLeader && !locked && (phase === 'home' || phase === 'result')
+  return isLeader && !locked && phase === 'home'
 }

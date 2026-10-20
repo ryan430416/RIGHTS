@@ -15,9 +15,9 @@ describe('shuffleCards', () => {
 })
 
 describe('canDraw', () => {
-  it('only allows the leader to draw from home or result', () => {
+  it('only allows the leader to draw from the home screen', () => {
     expect(canDraw('home', false, true)).toBe(true)
-    expect(canDraw('result', false, true)).toBe(true)
+    expect(canDraw('result', false, true)).toBe(false)
     expect(canDraw('summoning', false, true)).toBe(false)
     expect(canDraw('home', true, true)).toBe(false)
     expect(canDraw('home', false, false)).toBe(false)

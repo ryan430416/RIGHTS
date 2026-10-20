@@ -45,24 +45,24 @@ describe('DrawScreen', () => {
     fireEvent.click(start)
     fireEvent.click(start)
 
-    expect(screen.queryByRole('button', { name: '再抽一次' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '確定' })).not.toBeInTheDocument()
     expect(store.read()?.result).toBe('A')
     expect(store.read()?.totalDraws).toBe(1)
 
     await act(async () => {
       await vi.advanceTimersByTimeAsync(1999)
     })
-    expect(screen.queryByRole('button', { name: '再抽一次' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '確定' })).not.toBeInTheDocument()
 
     await act(async () => {
       await vi.advanceTimersByTimeAsync(1)
     })
 
     expect(screen.getByRole('img', { name: '守護騎士' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '再抽一次' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '確定' })).toBeInTheDocument()
   })
 
-  it('continues the same result after a refresh and does not redraw', async () => {
+  it('returns to the home screen on confirm without drawing again', async () => {
     const progress = commitDraw(createProgress(identity), identity)
     const store = memoryProgressStore(progress)
     localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify(progress))
@@ -71,12 +71,11 @@ describe('DrawScreen', () => {
     expect(store.read()?.totalDraws).toBe(1)
 
     await flushReady()
-    fireEvent.click(screen.getByRole('button', { name: '再抽一次' }))
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(0)
-    })
-    expect(screen.getByRole('img', { name: '巡境遊俠' })).toBeInTheDocument()
-    expect(store.read()?.totalDraws).toBe(2)
+    fireEvent.click(screen.getByRole('button', { name: '確定' }))
+    expect(screen.getByRole('button', { name: '開始抽卡' })).toBeInTheDocument()
+    expect(screen.queryByRole('img', { name: '守護騎士' })).not.toBeInTheDocument()
+    expect(store.read()?.result).toBeNull()
+    expect(store.read()?.totalDraws).toBe(1)
   })
 
   it('locks a non-leader tab', () => {
