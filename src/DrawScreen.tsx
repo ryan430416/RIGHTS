@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 import { CharacterCard } from './components/CharacterCard.tsx'
-import { cardById, TITLE, VISUALS } from './config/cards.ts'
+import { cardById, TITLE } from './config/cards.ts'
 import { usePrefersReducedMotion } from './hooks/usePrefersReducedMotion.ts'
 import { canDraw, REVEAL_DURATION_MS } from './lib/draw.ts'
 import type { DrawPhase } from './lib/draw.ts'
@@ -117,13 +117,12 @@ export function DrawScreen({
 
       {isLeader && phase === 'home' ? (
         <section className="home" aria-label="活動首頁">
+          <p className="home-watermark" aria-hidden="true">
+            {TITLE.main}
+          </p>
           <div className="home-copy">
             <p className="home-kicker">學生權益週</p>
-            <div className="home-title-wrap">
-              <span className="home-ornament" aria-hidden="true" />
-              <h1>{TITLE.main}</h1>
-              <span className="home-ornament home-ornament-flip" aria-hidden="true" />
-            </div>
+            <h1>{TITLE.main}</h1>
             <p className="home-chinese">
               <span aria-hidden="true">✦</span>
               {TITLE.chinese}
@@ -140,12 +139,6 @@ export function DrawScreen({
             >
               {ready ? '開始抽卡' : '載入素材中…'}
             </button>
-          </div>
-          <div className="home-art">
-            <span className="home-art-glow" aria-hidden="true" />
-            <div className="home-art-frame">
-              <img src={VISUALS.portal} alt="" />
-            </div>
           </div>
         </section>
       ) : null}

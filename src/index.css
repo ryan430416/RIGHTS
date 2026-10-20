@@ -70,17 +70,17 @@ h1 {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: 70% center;
-  filter: saturate(1.05) brightness(0.72);
-  transform: scale(1.04);
+  object-position: center 40%;
+  filter: saturate(1.08) brightness(0.78);
+  transform: scale(1.03);
 }
 
 .portal-bg-veil {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(90deg, rgba(7, 13, 24, 0.86) 0%, rgba(7, 13, 24, 0.38) 48%, rgba(7, 13, 24, 0.58) 100%),
-    radial-gradient(ellipse at 72% 55%, rgba(230, 197, 106, 0.18), transparent 42%);
+    linear-gradient(180deg, rgba(7, 13, 24, 0.42) 0%, rgba(7, 13, 24, 0.18) 38%, rgba(7, 13, 24, 0.55) 100%),
+    radial-gradient(ellipse at 50% 35%, rgba(230, 197, 106, 0.12), transparent 48%);
 }
 
 .portal-bg-glow {
@@ -125,130 +125,105 @@ h1 {
 }
 
 .home {
+  position: relative;
   flex: 1;
-  display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
-  gap: clamp(1rem, 3vw, 3rem);
+  display: flex;
   align-items: center;
-  width: min(1280px, 100%);
+  justify-content: center;
+  width: 100%;
   margin: 0 auto;
+  text-align: center;
+  padding: clamp(2rem, 8vh, 5rem) 1rem;
+}
+
+.home-watermark {
+  position: absolute;
+  left: 50%;
+  top: 18%;
+  margin: 0;
+  transform: translateX(-50%);
+  font-weight: 900;
+  font-size: clamp(4.5rem, 14vw, 11rem);
+  letter-spacing: 0.18em;
+  line-height: 1;
+  color: rgba(230, 197, 106, 0.08);
+  -webkit-text-stroke: 1px rgba(230, 197, 106, 0.12);
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
 }
 
 .home-copy {
-  max-width: 34rem;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 48rem;
 }
 
 .home-kicker {
-  margin: 0 0 0.6rem;
-  letter-spacing: 0.28em;
-  color: var(--gold-soft);
-  font-size: clamp(0.9rem, 1.4vw, 1.1rem);
-}
-
-.home-title-wrap {
-  display: flex;
-  align-items: center;
-  gap: 0.7rem;
-}
-
-.home-ornament {
-  width: clamp(28px, 4vw, 42px);
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--gold));
-  position: relative;
-  flex: 0 0 auto;
-}
-
-.home-ornament::after {
-  content: "";
-  position: absolute;
-  right: 0;
-  top: 50%;
-  width: 7px;
-  height: 7px;
-  background: var(--gold);
-  transform: translateY(-50%) rotate(45deg);
-}
-
-.home-ornament-flip {
-  transform: scaleX(-1);
+  margin: 0 0 0.85rem;
+  letter-spacing: 0.36em;
+  color: #f4efe4;
+  font-size: clamp(1rem, 1.6vw, 1.25rem);
 }
 
 .home h1 {
   margin: 0;
   font-weight: 900;
-  font-size: clamp(2.8rem, 6vw, 5.2rem);
-  letter-spacing: 0.12em;
-  line-height: 1.08;
+  font-size: clamp(3.2rem, 7.5vw, 6rem);
+  letter-spacing: 0.16em;
+  line-height: 1.05;
   color: var(--gold);
   -webkit-text-stroke: 1px #6d4d16;
-  text-shadow: 0 2px 0 #2d1c08, 0 0 24px rgba(230, 197, 106, 0.22);
+  text-shadow:
+    0 2px 0 #2d1c08,
+    0 0 28px rgba(230, 197, 106, 0.28),
+    0 0 60px rgba(230, 197, 106, 0.12);
 }
 
 .home-chinese {
-  margin: 0.85rem 0 0;
+  margin: 1rem 0 0;
   display: flex;
   align-items: center;
-  gap: 0.55rem;
-  font-size: clamp(1.15rem, 2vw, 1.7rem);
-  letter-spacing: 0.28em;
+  justify-content: center;
+  gap: 0.7rem;
+  font-size: clamp(1.2rem, 2.1vw, 1.75rem);
+  letter-spacing: 0.3em;
   color: var(--gold-soft);
 }
 
 .home-chinese span {
-  font-size: 0.7em;
-  opacity: 0.85;
+  font-size: 0.72em;
+  opacity: 0.9;
 }
 
 .home-english {
-  margin: 0.5rem 0 0;
+  margin: 0.55rem 0 0;
   font-family: Cinzel, "Times New Roman", serif;
-  font-size: clamp(0.78rem, 1.2vw, 1.05rem);
-  letter-spacing: 0.14em;
+  font-size: clamp(0.82rem, 1.25vw, 1.1rem);
+  letter-spacing: 0.16em;
   color: #f4efe4;
 }
 
 .home-rule {
-  width: min(280px, 70%);
+  width: min(320px, 68vw);
   height: 1px;
-  margin-top: 1rem;
-  background: linear-gradient(90deg, var(--gold), transparent);
-}
-
-.home-art {
+  margin-top: 1.15rem;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
   position: relative;
-  justify-self: end;
-  width: min(100%, 460px);
 }
 
-.home-art-glow {
+.home-rule::after {
+  content: "";
   position: absolute;
-  inset: 8% 4%;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(230, 197, 106, 0.28), transparent 70%);
-  filter: blur(10px);
-  animation: breathe 6s ease-in-out infinite;
-}
-
-.home-art-frame {
-  position: relative;
-  border: 1px solid rgba(230, 197, 106, 0.65);
-  border-radius: 18px;
-  overflow: hidden;
-  box-shadow:
-    0 0 0 6px rgba(8, 17, 31, 0.75),
-    0 24px 48px rgba(0, 0, 0, 0.45),
-    inset 0 0 0 1px rgba(244, 226, 173, 0.2);
-  background: #08111f;
-}
-
-.home-art img {
-  display: block;
-  width: 100%;
-  height: auto;
-  aspect-ratio: 3 / 4;
-  object-fit: cover;
-  object-position: center;
+  left: 50%;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  background: var(--gold);
+  transform: translate(-50%, -50%) rotate(45deg);
 }
 
 .action-button,
@@ -259,19 +234,24 @@ h1 {
 }
 
 .action-button {
-  margin-top: clamp(1.4rem, 3vh, 2.2rem);
-  min-width: min(280px, 80vw);
-  min-height: 64px;
-  padding: 0.75rem 1.8rem;
-  border-radius: 999px;
+  margin-top: clamp(1.6rem, 3.5vh, 2.4rem);
+  min-width: min(300px, 82vw);
+  min-height: 66px;
+  padding: 0.8rem 2rem;
+  border-radius: 14px;
   background: linear-gradient(180deg, #f8e7b2, #e0bc63 55%, #b5862e);
   color: #241806;
-  font-size: clamp(1.2rem, 2vw, 1.65rem);
+  font-size: clamp(1.25rem, 2vw, 1.7rem);
   font-weight: 900;
   letter-spacing: 0.22em;
   box-shadow:
     0 12px 28px rgba(0, 0, 0, 0.35),
     inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+.home .action-button {
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .action-button:disabled {
@@ -585,39 +565,12 @@ h1 {
 
 @media (max-width: 900px) {
   .home {
-    grid-template-columns: 1fr;
-    justify-items: center;
-    text-align: center;
-    padding-top: 2.6rem;
+    padding-top: 4.2rem;
   }
 
-  .home-copy {
-    order: 1;
-  }
-
-  .home-art {
-    order: 0;
-    width: min(100%, 280px);
-    justify-self: center;
-  }
-
-  .home-title-wrap {
-    justify-content: center;
-  }
-
-  .home-chinese {
-    justify-content: center;
-  }
-
-  .home-rule {
-    margin-left: auto;
-    margin-right: auto;
-    background: linear-gradient(90deg, transparent, var(--gold), transparent);
-  }
-
-  .action-button {
-    margin-left: auto;
-    margin-right: auto;
+  .home-watermark {
+    top: 12%;
+    letter-spacing: 0.1em;
   }
 
   .character-card.is-prominent .card-image {
@@ -630,7 +583,6 @@ h1 {
   .portal-bg-dust,
   .portal-bg-glow,
   .portal-bg-stream,
-  .home-art-glow,
   .summon-beam,
   .summon-portal,
   .summon-ring,
