@@ -1,10 +1,21 @@
 import { act, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import App from './App.tsx'
 import { DrawScreen } from './DrawScreen.tsx'
-import { createProgress, drawAt, memoryProgressStore, PROGRESS_STORAGE_KEY } from './lib/progress.ts'
+import {
+  commitDraw,
+  createProgress,
+  memoryProgressStore,
+  PROGRESS_STORAGE_KEY,
+} from './lib/progress.ts'
 
 const identity = () => 0.999999
+
+async function flushReady() {
+  await act(async () => {
+    await Promise.resolve()
+    await vi.advanceTimersByTimeAsync(0)
+  })
+}
 
 describe('DrawScreen', () => {
   beforeEach(() => {
@@ -17,70 +28,61 @@ describe('DrawScreen', () => {
     localStorage.clear()
   })
 
-  it('shows one card back and no assigned character', () => {
-    render(<App />)
+  it('shows the home screen with the start button', async () => {
+    render(<DrawScreen random={identity} store={memoryProgressStore()} forceLeader tabId="home" />)
     expect(screen.getByRole('heading', { name: '權流・溯源' })).toBeInTheDocument()
-    expect(screen.getByText('點選卡牌，開啟你的權益旅程。')).toBeInTheDocument()
-    expect(screen.getAllByRole('button', { name: '選擇卡牌' })).toHaveLength(1)
-    expect(document.querySelectorAll('img')).toHaveLength(0)
-    expect(screen.getByRole('button', { name: '全螢幕' })).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: '確認' })).not.toBeInTheDocument()
+    expect(screen.getByText('溯其源・知其權')).toBeInTheDocument()
+    expect(screen.getByText('TRACE THE SOURCE. KNOW YOUR RIGHTS.')).toBeInTheDocument()
+    await flushReady()
+    expect(screen.getByRole('button', { name: '開始抽卡' })).toBeEnabled()
   })
 
-  it('locks the first click and reveals the next character', async () => {
+  it('locks during the summon and shows the committed card', async () => {
     const store = memoryProgressStore()
-    render(<DrawScreen random={identity} revealDurationMs={2000} store={store} />)
-    const card = screen.getByRole('button', { name: '選擇卡牌' })
-    fireEvent.click(card)
-    fireEvent.click(card)
-    fireEvent.click(card)
+    render(<DrawScreen random={identity} revealDurationMs={2000} store={store} forceLeader tabId="t1" />)
+    await flushReady()
+    const start = screen.getByRole('button', { name: '開始抽卡' })
+    fireEvent.click(start)
+    fireEvent.click(start)
 
-    expect(screen.queryByRole('button', { name: '確認' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '再抽一次' })).not.toBeInTheDocument()
+    expect(store.read()?.result).toBe('A')
+    expect(store.read()?.totalDraws).toBe(1)
+
     await act(async () => {
-      await vi.advanceTimersByTimeAsync(2000)
+      await vi.advanceTimersByTimeAsync(1999)
+    })
+    expect(screen.queryByRole('button', { name: '再抽一次' })).not.toBeInTheDocument()
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1)
     })
 
-    expect(screen.getByRole('img', { name: '卡片1' })).toBeInTheDocument()
-    expect(screen.queryByRole('img', { name: '卡片2' })).not.toBeInTheDocument()
-    expect(store.read()?.result).toEqual({ character: 'A', position: 0 })
-    expect(store.read()?.nextIndex).toBe(1)
+    expect(screen.getByRole('img', { name: '守護騎士' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '再抽一次' })).toBeInTheDocument()
   })
 
-  it('returns to the back without reshuffling or drawing again', async () => {
-    const store = memoryProgressStore()
-    const view = render(<DrawScreen random={identity} revealDurationMs={0} store={store} />)
-    fireEvent.click(screen.getByRole('button', { name: '選擇卡牌' }))
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(0)
-    })
-    const savedRound = store.read()?.round
-
-    fireEvent.click(screen.getByRole('button', { name: '確認' }))
-    expect(screen.getAllByRole('button', { name: '選擇卡牌' })).toHaveLength(1)
-    expect(document.querySelectorAll('img')).toHaveLength(0)
-    expect(store.read()).toMatchObject({ round: savedRound, nextIndex: 1, result: null })
-
-    fireEvent.click(screen.getByRole('button', { name: '選擇卡牌' }))
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(0)
-    })
-    expect(screen.getByRole('img', { name: '卡片2' })).toBeInTheDocument()
-
-    view.unmount()
-    render(<DrawScreen random={identity} revealDurationMs={0} store={store} />)
-    expect(screen.getByRole('img', { name: '卡片2' })).toBeInTheDocument()
-    expect(store.read()?.nextIndex).toBe(2)
-    expect(screen.queryByRole('img', { name: '卡片3' })).not.toBeInTheDocument()
-  })
-
-  it('continues the saved result when the page reloads during the reveal', () => {
-    const progress = drawAt(createProgress(identity), 3, identity)
+  it('continues the same result after a refresh and does not redraw', async () => {
+    const progress = commitDraw(createProgress(identity), identity)
     const store = memoryProgressStore(progress)
     localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify(progress))
+    render(<DrawScreen random={() => 0} store={store} forceLeader tabId="t2" />)
+    expect(screen.getByRole('img', { name: '守護騎士' })).toBeInTheDocument()
+    expect(store.read()?.totalDraws).toBe(1)
 
-    render(<DrawScreen random={() => 0} store={store} />)
-    expect(screen.getByRole('img', { name: '卡片1' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '確認' })).toBeInTheDocument()
-    expect(store.read()).toEqual(progress)
+    await flushReady()
+    fireEvent.click(screen.getByRole('button', { name: '再抽一次' }))
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(0)
+    })
+    expect(screen.getByRole('img', { name: '巡境遊俠' })).toBeInTheDocument()
+    expect(store.read()?.totalDraws).toBe(2)
+  })
+
+  it('locks a non-leader tab', () => {
+    const store = memoryProgressStore()
+    render(<DrawScreen random={identity} store={store} forceLeader={false} tabId="follower" />)
+    expect(screen.getByText('抽卡已在另一個分頁進行中。')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '開始抽卡' })).not.toBeInTheDocument()
   })
 })

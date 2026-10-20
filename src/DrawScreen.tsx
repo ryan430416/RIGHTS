@@ -1,45 +1,49 @@
 import { useEffect, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
-import { Banner } from './components/Banner.tsx'
-import { CardBack } from './components/CardBack.tsx'
 import { CharacterCard } from './components/CharacterCard.tsx'
+import { cardById, TITLE, VISUALS } from './config/cards.ts'
 import { usePrefersReducedMotion } from './hooks/usePrefersReducedMotion.ts'
-import { canPick, REVEAL_DURATION_MS } from './lib/draw.ts'
+import { canDraw, REVEAL_DURATION_MS } from './lib/draw.ts'
 import type { DrawPhase } from './lib/draw.ts'
+import { preloadSiteAssets } from './lib/preload.ts'
 import {
-  cardForCharacter,
+  clearResult,
+  commitDraw,
   createProgress,
-  drawAt,
   localProgressStore,
-  returnToBacks,
 } from './lib/progress.ts'
 import type { DrawProgress, ProgressStore } from './lib/progress.ts'
+import { claimTabLeadership, createTabId } from './lib/tabLock.ts'
 
 type DrawScreenProps = {
   random?: () => number
   revealDurationMs?: number
   store?: ProgressStore
+  tabId?: string
+  forceLeader?: boolean
 }
 
-const MOTES = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
-const ORBIT = [0, 1, 2, 3, 4, 5, 6, 7]
 const browserProgressStore = localProgressStore()
 
 export function DrawScreen({
   random,
   revealDurationMs = REVEAL_DURATION_MS,
   store = browserProgressStore,
+  tabId,
+  forceLeader,
 }: DrawScreenProps) {
   const [progress, setProgress] = useState<DrawProgress>(() => store.read() ?? createProgress(random))
-  const [phase, setPhase] = useState<DrawPhase>(progress.result ? 'result' : 'select')
-  const locked = useRef(progress.result !== null)
-  const shouldFocusCard = useRef(false)
-  const nextRef = useRef<HTMLButtonElement>(null)
-  const cardRef = useRef<HTMLButtonElement>(null)
+  const [phase, setPhase] = useState<DrawPhase>(() => (progress.result ? 'result' : 'home'))
+  const [ready, setReady] = useState(false)
+  const [electedLeader, setElectedLeader] = useState(true)
+  const locked = useRef(false)
   const progressRef = useRef(progress)
+  const actionRef = useRef<HTMLButtonElement>(null)
+  const ownTabId = useRef(tabId ?? createTabId())
   const reducedMotion = usePrefersReducedMotion()
   const duration = reducedMotion ? 0 : revealDurationMs
-  const drawn = progress.result ? cardForCharacter(progress.result.character) : null
+  const drawn = progress.result ? cardById(progress.result) : null
+  const isLeader = forceLeader ?? electedLeader
 
   useEffect(() => {
     progressRef.current = progress
@@ -47,125 +51,116 @@ export function DrawScreen({
   }, [progress, store])
 
   useEffect(() => {
-    if (phase !== 'revealing') return
-    const timer = window.setTimeout(() => setPhase('result'), duration)
+    let cancelled = false
+    void preloadSiteAssets().then(() => {
+      if (!cancelled) setReady(true)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  useEffect(() => {
+    if (forceLeader != null) return
+    return claimTabLeadership(ownTabId.current, setElectedLeader)
+  }, [forceLeader])
+
+  useEffect(() => {
+    if (phase !== 'summoning') return
+    const timer = window.setTimeout(() => {
+      locked.current = false
+      setPhase('result')
+    }, duration)
     return () => window.clearTimeout(timer)
   }, [phase, duration])
 
   useEffect(() => {
-    if (phase === 'result') nextRef.current?.focus()
+    if (phase === 'home' || phase === 'result') actionRef.current?.focus()
   }, [phase])
 
-  useEffect(() => {
-    if (phase !== 'select' || !shouldFocusCard.current) return
-    shouldFocusCard.current = false
-    cardRef.current?.focus()
-  }, [phase, progress])
-
-  function pick() {
-    if (!canPick(phase, locked.current) || progressRef.current.result) return
+  function draw() {
+    if (!canDraw(phase, locked.current, isLeader)) return
     locked.current = true
-    const next = drawAt(progressRef.current, 0, random)
+    const base = progressRef.current.result ? clearResult(progressRef.current) : progressRef.current
+    const next = commitDraw(base, random)
     progressRef.current = next
+    store.write(next)
     setProgress(next)
-    setPhase('revealing')
-  }
-
-  function returnToSelect() {
-    shouldFocusCard.current = true
-    locked.current = false
-    const next = returnToBacks(progressRef.current)
-    progressRef.current = next
-    setProgress(next)
-    setPhase('select')
+    setPhase('summoning')
   }
 
   const style = { '--reveal-ms': `${duration}ms` } as CSSProperties
-  const drawing = phase === 'revealing'
 
   return (
     <div className="draw" style={style}>
+      {!isLeader ? (
+        <div className="tab-lock" role="status">
+          <p>抽卡已在另一個分頁進行中。</p>
+          <p>請關閉此分頁，或回到主要抽卡視窗繼續操作。</p>
+        </div>
+      ) : null}
+
       <p className="visually-hidden" aria-live="polite">
-        {phase === 'result' && drawn ? `已抽出${drawn.label}` : ''}
+        {phase === 'result' && drawn ? `已抽出${drawn.name}` : ''}
       </p>
-      {phase === 'result' && drawn ? (
+
+      {isLeader && phase === 'home' ? (
+        <section className="home" aria-label="活動首頁">
+          <div className="home-copy">
+            <p className="home-kicker">學生權益週</p>
+            <h1>{TITLE.main}</h1>
+            <p className="home-chinese">{TITLE.chinese}</p>
+            <p className="home-english">{TITLE.english}</p>
+            <button
+              ref={actionRef}
+              type="button"
+              className="action-button"
+              disabled={!ready || !isLeader}
+              onClick={draw}
+            >
+              {ready ? '開始抽卡' : '載入素材中…'}
+            </button>
+          </div>
+          <div className="home-art">
+            <img src={VISUALS.portal} alt="" />
+          </div>
+        </section>
+      ) : null}
+
+      {isLeader && phase === 'summoning' ? (
+        <section className="summon" aria-label="抽卡動畫" aria-busy="true">
+          <div className="summon-stage">
+            <span className="summon-portal" />
+            <span className="summon-ring" />
+            <span className="summon-ring summon-ring-late" />
+            <span className="summon-spark" />
+            {drawn ? (
+              <div className="summon-card">
+                <CharacterCard card={drawn} prominent />
+              </div>
+            ) : null}
+          </div>
+          <p className="summon-caption">權流匯聚中…</p>
+        </section>
+      ) : null}
+
+      {isLeader && phase === 'result' && drawn ? (
         <section className="result" aria-label="抽卡結果">
           <div className="result-stage">
-            <div className="result-halo" aria-hidden="true" />
-            <span className="result-sparks" aria-hidden="true">
-              {MOTES.map((mote) => (
-                <span key={mote} className="fx-mote" style={{ '--i': mote } as CSSProperties} />
-              ))}
-            </span>
+            <span className="result-glow" aria-hidden="true" />
             <CharacterCard card={drawn} prominent />
           </div>
-          <button ref={nextRef} type="button" className="next-button" onClick={returnToSelect}>
-            確認
+          <button
+            ref={actionRef}
+            type="button"
+            className="action-button"
+            disabled={!isLeader}
+            onClick={draw}
+          >
+            再抽一次
           </button>
         </section>
-      ) : (
-        <>
-          <Banner />
-          <div className="draw-body">
-            <div className={drawing ? 'solo-card is-drawing' : 'solo-card'}>
-              <span className="solo-ambient" aria-hidden="true">
-                <span className="ambient-pool" />
-                <span className="ambient-ring" />
-                <span className="ambient-ring ambient-ring-inner" />
-                {ORBIT.map((star) => (
-                  <span key={star} className="ambient-star" style={{ '--i': star } as CSSProperties} />
-                ))}
-              </span>
-              {drawing ? (
-                <span className="draw-fx" aria-hidden="true">
-                  <span className="fx-pillar" />
-                  <span className="fx-glow" />
-                  <span className="fx-rays" />
-                  <span className="fx-rays fx-rays-reverse" />
-                  <span className="fx-orbit">
-                    {ORBIT.map((star) => (
-                      <span key={star} className="fx-orbit-star" style={{ '--i': star } as CSSProperties} />
-                    ))}
-                  </span>
-                  <span className="fx-ring" />
-                  <span className="fx-ring fx-ring-late" />
-                  <span className="fx-ring fx-ring-last" />
-                  {MOTES.map((mote) => (
-                    <span key={`gather-${mote}`} className="fx-mote fx-gather" style={{ '--i': mote } as CSSProperties} />
-                  ))}
-                  {MOTES.map((mote) => (
-                    <span key={mote} className="fx-mote" style={{ '--i': mote } as CSSProperties} />
-                  ))}
-                </span>
-              ) : null}
-              <button
-                ref={cardRef}
-                type="button"
-                className="card-button"
-                aria-label="選擇卡牌"
-                aria-disabled={phase !== 'select'}
-                tabIndex={phase === 'select' ? 0 : -1}
-                onClick={pick}
-              >
-                <span className="card-tilt">
-                  <span className="card-inner">
-                    <span className="card-face card-face-back">
-                      <CardBack />
-                    </span>
-                    <span className="card-face card-face-front" aria-hidden={!drawing}>
-                      {drawing && drawn ? <CharacterCard card={drawn} /> : null}
-                    </span>
-                  </span>
-                </span>
-                {drawing ? <span className="card-shimmer" /> : null}
-              </button>
-            </div>
-            <p id="draw-prompt" className={drawing ? 'prompt is-dim' : 'prompt'}>
-              點選卡牌，開啟你的權益旅程。
-            </p>
-          </div>
-        </>
-      )}
+      ) : null}
     </div>
   )
 }

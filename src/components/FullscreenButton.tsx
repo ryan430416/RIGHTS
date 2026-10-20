@@ -19,7 +19,7 @@ export function FullscreenButton() {
         await document.documentElement.requestFullscreen()
       }
     } catch {
-      // Fullscreen can be declined by the browser. The draw flow still works.
+      // Fullscreen can be declined by the browser.
     }
   }
 

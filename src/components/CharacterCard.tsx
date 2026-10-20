@@ -14,12 +14,12 @@ export function CharacterCard({ card, prominent = false }: CharacterCardProps) {
 
   return (
     <div className={prominent ? 'character-card is-prominent' : 'character-card'}>
-      {ready ? null : <CardPlaceholder label={card.label} />}
+      {ready ? null : <CardPlaceholder label={card.name} />}
       {failed ? null : (
         <img
           className={ready ? 'card-image' : 'card-image is-pending'}
           src={card.src}
-          alt={ready ? card.label : ''}
+          alt={ready ? card.name : ''}
           aria-hidden={ready ? undefined : true}
           draggable={false}
           onLoad={() => setLoaded(true)}

@@ -1,6 +1,6 @@
-export const REVEAL_DURATION_MS = 2800
+export const REVEAL_DURATION_MS = 2400
 
-export type DrawPhase = 'select' | 'revealing' | 'result'
+export type DrawPhase = 'home' | 'summoning' | 'result'
 
 export function defaultRandom(): number {
   if (typeof crypto !== 'undefined' && typeof crypto.getRandomValues === 'function') {
@@ -11,7 +11,7 @@ export function defaultRandom(): number {
   return Math.random()
 }
 
-/** Uniform shuffle. Each card is equally likely to land in any position. */
+/** Fisher–Yates. Unbiased shuffle. */
 export function shuffleCards<T>(cards: readonly T[], random: () => number = defaultRandom): T[] {
   const next = cards.slice()
   for (let i = next.length - 1; i > 0; i -= 1) {
@@ -25,6 +25,6 @@ export function shuffleCards<T>(cards: readonly T[], random: () => number = defa
   return next
 }
 
-export function canPick(phase: DrawPhase, locked: boolean): boolean {
-  return phase === 'select' && !locked
+export function canDraw(phase: DrawPhase, locked: boolean, isLeader: boolean): boolean {
+  return isLeader && !locked && (phase === 'home' || phase === 'result')
 }
