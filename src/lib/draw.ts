@@ -1,4 +1,4 @@
-export const REVEAL_DURATION_MS = 2400
+export const REVEAL_DURATION_MS = 2800
 
 export type DrawPhase = 'home' | 'summoning' | 'result'
 

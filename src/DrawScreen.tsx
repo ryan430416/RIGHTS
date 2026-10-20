@@ -24,6 +24,8 @@ type DrawScreenProps = {
 }
 
 const browserProgressStore = localProgressStore()
+const ORBIT = [0, 1, 2, 3, 4, 5, 6, 7]
+const MOTES = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
 
 export function DrawScreen({
   random,
@@ -117,9 +119,18 @@ export function DrawScreen({
         <section className="home" aria-label="活動首頁">
           <div className="home-copy">
             <p className="home-kicker">學生權益週</p>
-            <h1>{TITLE.main}</h1>
-            <p className="home-chinese">{TITLE.chinese}</p>
+            <div className="home-title-wrap">
+              <span className="home-ornament" aria-hidden="true" />
+              <h1>{TITLE.main}</h1>
+              <span className="home-ornament home-ornament-flip" aria-hidden="true" />
+            </div>
+            <p className="home-chinese">
+              <span aria-hidden="true">✦</span>
+              {TITLE.chinese}
+              <span aria-hidden="true">✦</span>
+            </p>
             <p className="home-english">{TITLE.english}</p>
+            <div className="home-rule" aria-hidden="true" />
             <button
               ref={actionRef}
               type="button"
@@ -131,7 +142,10 @@ export function DrawScreen({
             </button>
           </div>
           <div className="home-art">
-            <img src={VISUALS.portal} alt="" />
+            <span className="home-art-glow" aria-hidden="true" />
+            <div className="home-art-frame">
+              <img src={VISUALS.portal} alt="" />
+            </div>
           </div>
         </section>
       ) : null}
@@ -139,12 +153,24 @@ export function DrawScreen({
       {isLeader && phase === 'summoning' ? (
         <section className="summon" aria-label="抽卡動畫" aria-busy="true">
           <div className="summon-stage">
-            <span className="summon-portal" />
-            <span className="summon-ring" />
-            <span className="summon-ring summon-ring-late" />
-            <span className="summon-spark" />
+            <span className="summon-beam" aria-hidden="true" />
+            <span className="summon-portal" aria-hidden="true" />
+            <span className="summon-portal summon-portal-core" aria-hidden="true" />
+            <span className="summon-ring" aria-hidden="true" />
+            <span className="summon-ring summon-ring-late" aria-hidden="true" />
+            <span className="summon-ring summon-ring-last" aria-hidden="true" />
+            <span className="summon-orbit" aria-hidden="true">
+              {ORBIT.map((star) => (
+                <span key={star} className="summon-orbit-star" style={{ '--i': star } as CSSProperties} />
+              ))}
+            </span>
+            {MOTES.map((mote) => (
+              <span key={mote} className="summon-mote" style={{ '--i': mote } as CSSProperties} aria-hidden="true" />
+            ))}
+            <span className="summon-spark" aria-hidden="true" />
             {drawn ? (
               <div className="summon-card">
+                <span className="summon-shimmer" aria-hidden="true" />
                 <CharacterCard card={drawn} prominent />
               </div>
             ) : null}
@@ -157,7 +183,11 @@ export function DrawScreen({
         <section className="result" aria-label="抽卡結果">
           <div className="result-stage">
             <span className="result-glow" aria-hidden="true" />
-            <CharacterCard card={drawn} prominent />
+            <span className="result-rays" aria-hidden="true" />
+            <span className="result-ring" aria-hidden="true" />
+            <div className="result-card">
+              <CharacterCard card={drawn} prominent />
+            </div>
           </div>
           <button
             ref={actionRef}
