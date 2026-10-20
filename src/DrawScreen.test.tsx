@@ -46,7 +46,7 @@ describe('DrawScreen', () => {
     fireEvent.click(start)
     fireEvent.click(start)
 
-    expect(screen.queryByRole('button', { name: '再抽一次' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '確定' })).not.toBeInTheDocument()
     expect(store.read()?.result).toBe('A')
     expect(store.read()?.totalDraws).toBe(1)
     expect(document.querySelector('.card-slot.is-flipping')).not.toBeNull()
@@ -54,17 +54,17 @@ describe('DrawScreen', () => {
     await act(async () => {
       await vi.advanceTimersByTimeAsync(1799)
     })
-    expect(screen.queryByRole('button', { name: '再抽一次' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '確定' })).not.toBeInTheDocument()
 
     await act(async () => {
       await vi.advanceTimersByTimeAsync(1)
     })
 
     expect(screen.getByRole('img', { name: '守護騎士' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '再抽一次' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '確定' })).toBeInTheDocument()
   })
 
-  it('starts the next draw from the result screen without a separate intro page', async () => {
+  it('returns to the summon home after confirm', async () => {
     const progress = commitDraw(createProgress(identity), identity)
     const store = memoryProgressStore(progress)
     localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify(progress))
@@ -73,13 +73,11 @@ describe('DrawScreen', () => {
     expect(store.read()?.totalDraws).toBe(1)
 
     await flushReady()
-    fireEvent.click(screen.getByRole('button', { name: '再抽一次' }))
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(0)
-    })
-    expect(screen.getByRole('img', { name: '巡境遊俠' })).toBeInTheDocument()
-    expect(store.read()?.totalDraws).toBe(2)
-    expect(screen.queryByRole('button', { name: '開始抽卡' })).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: '確定' }))
+    expect(screen.getByRole('button', { name: '開始抽卡' })).toBeInTheDocument()
+    expect(document.querySelector('.card-back')).not.toBeNull()
+    expect(store.read()?.result).toBeNull()
+    expect(store.read()?.totalDraws).toBe(1)
   })
 
   it('locks a non-leader tab', () => {

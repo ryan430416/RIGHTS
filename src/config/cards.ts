@@ -20,9 +20,9 @@ export const CARD_DEFINITIONS: readonly CardDefinition[] = [
  * 活動主視覺路徑。之後可替換 public/visuals/ 內檔案，或改這裡的路徑。
  */
 export const VISUALS = {
-  hero: '/visuals/hero.jpg',
+  /** 高解析含字大背板（3070×2050） */
+  hero: '/visuals/hero.png',
   banner: '/visuals/banner.jpg',
-  portal: '/visuals/portal.jpg',
 } as const
 
 export const TITLE = {

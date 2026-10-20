@@ -29,7 +29,6 @@ export function preloadSiteAssets(): Promise<void> {
   return preloadImages([
     VISUALS.hero,
     VISUALS.banner,
-    VISUALS.portal,
     ...CARD_DEFINITIONS.map((card) => card.src),
   ])
 }

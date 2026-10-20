@@ -1,8 +1,8 @@
 # 權流・溯源｜學生權益週抽卡
 
-現場用的純前端抽卡網站：開始抽卡 → 卡背翻牌召喚 → 顯示角色卡 → 再抽一次。
+現場用的純前端抽卡網站：開始抽卡 → 卡背翻牌召喚 → 顯示角色卡 → 確定回到召喚首頁。
 
-主視覺 `public/visuals/hero.jpg` 為含字版，畫面不再重複疊加主標與副標。
+主視覺 `public/visuals/hero.png` 為含字高解析大背板（3070×2050），畫面不再重複疊加主標與副標。
 
 ## 啟動預覽
 
@@ -22,8 +22,7 @@ npm run preview
 
 | 用途 | 路徑 |
 | --- | --- |
-| 主視覺背景 | `public/visuals/hero.jpg` |
-| 首頁側圖／傳送門 | `public/visuals/portal.jpg` |
+| 主視覺背景 | `public/visuals/hero.png`（3070×2050） |
 | 橫幅（備用） | `public/visuals/banner.jpg` |
 | 守護騎士 (A) | `public/cards/card-a.png` |
 | 巡境遊俠 (B) | `public/cards/card-b.png` |

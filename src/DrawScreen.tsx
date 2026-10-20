@@ -26,7 +26,8 @@ type DrawScreenProps = {
 }
 
 const browserProgressStore = localProgressStore()
-const AMBIENT = [0, 1, 2, 3, 4, 5]
+const AMBIENT = [0, 1, 2, 3, 4, 5, 6, 7]
+const SPARKS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
 export function DrawScreen({
   random,
@@ -103,9 +104,13 @@ export function DrawScreen({
     beginDraw()
   }
 
-  function drawAgain() {
+  function confirmResult() {
     if (!isLeader || phase !== 'result' || locked.current) return
-    beginDraw()
+    const next = clearResult(progressRef.current)
+    progressRef.current = next
+    store.write(next)
+    setProgress(next)
+    setPhase('home')
   }
 
   const style = { '--reveal-ms': `${duration}ms` } as CSSProperties
@@ -142,14 +147,25 @@ export function DrawScreen({
                 .filter(Boolean)
                 .join(' ')}
             >
-              {phase === 'home' ? (
-                <span className="card-ambient" aria-hidden="true">
+              {phase === 'home' || flipping ? (
+                <span className={flipping ? 'card-ambient is-summoning' : 'card-ambient'} aria-hidden="true">
                   {AMBIENT.map((mote) => (
                     <span key={mote} className="card-ambient-mote" style={{ '--i': mote } as CSSProperties} />
                   ))}
                 </span>
               ) : null}
-              {flipping ? <span className="card-rim" aria-hidden="true" /> : null}
+              {flipping ? (
+                <>
+                  <span className="card-burst" aria-hidden="true" />
+                  <span className="card-flash" aria-hidden="true" />
+                  <span className="card-rim" aria-hidden="true" />
+                  <span className="card-sparks" aria-hidden="true">
+                    {SPARKS.map((spark) => (
+                      <span key={spark} className="card-spark" style={{ '--i': spark } as CSSProperties} />
+                    ))}
+                  </span>
+                </>
+              ) : null}
               <div className="card-flipper">
                 <div className="card-face card-face-back">
                   <CardBack />
@@ -180,9 +196,9 @@ export function DrawScreen({
                 type="button"
                 className="action-button"
                 disabled={!isLeader}
-                onClick={drawAgain}
+                onClick={confirmResult}
               >
-                再抽一次
+                確定
               </button>
             ) : null}
           </div>
