@@ -15,7 +15,7 @@ describe('shuffleCards', () => {
 })
 
 describe('canDraw', () => {
-  it('only allows the leader to draw from the home screen', () => {
+  it('only allows the leader to start a draw from the idle summon stage', () => {
     expect(canDraw('home', false, true)).toBe(true)
     expect(canDraw('result', false, true)).toBe(false)
     expect(canDraw('summoning', false, true)).toBe(false)

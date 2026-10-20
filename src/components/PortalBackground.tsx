@@ -1,14 +1,18 @@
 import { VISUALS } from '../config/cards.ts'
 
-export function PortalBackground() {
+type PortalBackgroundProps = {
+  dimmed?: boolean
+}
+
+export function PortalBackground({ dimmed = false }: PortalBackgroundProps) {
   return (
-    <div className="portal-bg" aria-hidden="true">
-      <img className="portal-bg-image" src={VISUALS.hero} alt="" />
+    <div className={dimmed ? 'portal-bg is-dimmed' : 'portal-bg'} aria-hidden="true">
+      <picture>
+        <source media="(max-width: 900px)" srcSet={VISUALS.portal} />
+        <img className="portal-bg-image" src={VISUALS.hero} alt="" />
+      </picture>
       <div className="portal-bg-veil" />
-      <div className="portal-bg-glow" />
-      <div className="portal-bg-vignette" />
-      <div className="portal-bg-dust" />
-      <div className="portal-bg-stream" />
+      <div className="portal-bg-floor" />
     </div>
   )
 }

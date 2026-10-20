@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
+import { CardBack } from './components/CardBack.tsx'
 import { CharacterCard } from './components/CharacterCard.tsx'
 import { cardById, TITLE } from './config/cards.ts'
 import { usePrefersReducedMotion } from './hooks/usePrefersReducedMotion.ts'
@@ -21,11 +22,11 @@ type DrawScreenProps = {
   store?: ProgressStore
   tabId?: string
   forceLeader?: boolean
+  onDimChange?: (dimmed: boolean) => void
 }
 
 const browserProgressStore = localProgressStore()
-const ORBIT = [0, 1, 2, 3, 4, 5, 6, 7]
-const MOTES = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+const AMBIENT = [0, 1, 2, 3, 4, 5]
 
 export function DrawScreen({
   random,
@@ -33,6 +34,7 @@ export function DrawScreen({
   store = browserProgressStore,
   tabId,
   forceLeader,
+  onDimChange,
 }: DrawScreenProps) {
   const [progress, setProgress] = useState<DrawProgress>(() => store.read() ?? createProgress(random))
   const [phase, setPhase] = useState<DrawPhase>(() => (progress.result ? 'result' : 'home'))
@@ -46,11 +48,17 @@ export function DrawScreen({
   const duration = reducedMotion ? 0 : revealDurationMs
   const drawn = progress.result ? cardById(progress.result) : null
   const isLeader = forceLeader ?? electedLeader
+  const flipping = phase === 'summoning'
+  const revealed = phase === 'result' || phase === 'summoning'
 
   useEffect(() => {
     progressRef.current = progress
     store.write(progress)
   }, [progress, store])
+
+  useEffect(() => {
+    onDimChange?.(phase === 'result')
+  }, [phase, onDimChange])
 
   useEffect(() => {
     let cancelled = false
@@ -80,30 +88,30 @@ export function DrawScreen({
     if (phase === 'home' || phase === 'result') actionRef.current?.focus()
   }, [phase])
 
-  function draw() {
-    if (!canDraw(phase, locked.current, isLeader) || progressRef.current.result) return
+  function beginDraw() {
     locked.current = true
-    const next = commitDraw(progressRef.current, random)
+    const base = progressRef.current.result ? clearResult(progressRef.current) : progressRef.current
+    const next = commitDraw(base, random)
     progressRef.current = next
     store.write(next)
     setProgress(next)
     setPhase('summoning')
   }
 
-  function confirm() {
-    if (!isLeader || phase !== 'result') return
-    locked.current = false
-    const next = clearResult(progressRef.current)
-    progressRef.current = next
-    store.write(next)
-    setProgress(next)
-    setPhase('home')
+  function draw() {
+    if (!canDraw(phase, locked.current, isLeader) || progressRef.current.result) return
+    beginDraw()
+  }
+
+  function drawAgain() {
+    if (!isLeader || phase !== 'result' || locked.current) return
+    beginDraw()
   }
 
   const style = { '--reveal-ms': `${duration}ms` } as CSSProperties
 
   return (
-    <div className="draw" style={style}>
+    <div className={phase === 'result' ? 'draw is-result' : 'draw'} style={style}>
       {!isLeader ? (
         <div className="tab-lock" role="status">
           <p>抽卡已在另一個分頁進行中。</p>
@@ -111,86 +119,73 @@ export function DrawScreen({
         </div>
       ) : null}
 
+      <h1 className="visually-hidden">{TITLE.main}</h1>
+      <p className="visually-hidden">{TITLE.chinese}</p>
+      <p className="visually-hidden">{TITLE.english}</p>
       <p className="visually-hidden" aria-live="polite">
         {phase === 'result' && drawn ? `已抽出${drawn.name}` : ''}
       </p>
 
-      {isLeader && phase === 'home' ? (
-        <section className="home" aria-label="活動首頁">
-          <p className="home-watermark" aria-hidden="true">
-            {TITLE.main}
-          </p>
-          <div className="home-copy">
-            <p className="home-kicker">學生權益週</p>
-            <h1>{TITLE.main}</h1>
-            <p className="home-chinese">
-              <span aria-hidden="true">✦</span>
-              {TITLE.chinese}
-              <span aria-hidden="true">✦</span>
-            </p>
-            <p className="home-english">{TITLE.english}</p>
-            <div className="home-rule" aria-hidden="true" />
-            <button
-              ref={actionRef}
-              type="button"
-              className="action-button"
-              disabled={!ready || !isLeader}
-              onClick={draw}
+      {isLeader ? (
+        <section
+          className={`arena arena-${phase}`}
+          aria-label={phase === 'result' ? '抽卡結果' : '抽卡召喚'}
+          aria-busy={flipping || undefined}
+        >
+          <div className="summon-focus">
+            <div
+              className={[
+                'card-slot',
+                flipping ? 'is-flipping' : '',
+                revealed && drawn ? 'is-revealed' : '',
+              ]
+                .filter(Boolean)
+                .join(' ')}
             >
-              {ready ? '開始抽卡' : '載入素材中…'}
-            </button>
-          </div>
-        </section>
-      ) : null}
-
-      {isLeader && phase === 'summoning' ? (
-        <section className="summon" aria-label="抽卡動畫" aria-busy="true">
-          <div className="summon-stage">
-            <span className="summon-beam" aria-hidden="true" />
-            <span className="summon-portal" aria-hidden="true" />
-            <span className="summon-portal summon-portal-core" aria-hidden="true" />
-            <span className="summon-ring" aria-hidden="true" />
-            <span className="summon-ring summon-ring-late" aria-hidden="true" />
-            <span className="summon-ring summon-ring-last" aria-hidden="true" />
-            <span className="summon-orbit" aria-hidden="true">
-              {ORBIT.map((star) => (
-                <span key={star} className="summon-orbit-star" style={{ '--i': star } as CSSProperties} />
-              ))}
-            </span>
-            {MOTES.map((mote) => (
-              <span key={mote} className="summon-mote" style={{ '--i': mote } as CSSProperties} aria-hidden="true" />
-            ))}
-            <span className="summon-spark" aria-hidden="true" />
-            {drawn ? (
-              <div className="summon-card">
-                <span className="summon-shimmer" aria-hidden="true" />
-                <CharacterCard card={drawn} prominent />
+              {phase === 'home' ? (
+                <span className="card-ambient" aria-hidden="true">
+                  {AMBIENT.map((mote) => (
+                    <span key={mote} className="card-ambient-mote" style={{ '--i': mote } as CSSProperties} />
+                  ))}
+                </span>
+              ) : null}
+              {flipping ? <span className="card-rim" aria-hidden="true" /> : null}
+              <div className="card-flipper">
+                <div className="card-face card-face-back">
+                  <CardBack />
+                </div>
+                <div className="card-face card-face-front">
+                  {drawn ? <CharacterCard card={drawn} prominent /> : null}
+                </div>
               </div>
+            </div>
+
+            {phase === 'home' ? (
+              <button
+                ref={actionRef}
+                type="button"
+                className="action-button"
+                disabled={!ready || !isLeader}
+                onClick={draw}
+              >
+                {ready ? '開始抽卡' : '載入素材中…'}
+              </button>
+            ) : null}
+
+            {phase === 'summoning' ? <p className="summon-caption">權流匯聚中…</p> : null}
+
+            {phase === 'result' && drawn ? (
+              <button
+                ref={actionRef}
+                type="button"
+                className="action-button"
+                disabled={!isLeader}
+                onClick={drawAgain}
+              >
+                再抽一次
+              </button>
             ) : null}
           </div>
-          <p className="summon-caption">權流匯聚中…</p>
-        </section>
-      ) : null}
-
-      {isLeader && phase === 'result' && drawn ? (
-        <section className="result" aria-label="抽卡結果">
-          <div className="result-stage">
-            <span className="result-glow" aria-hidden="true" />
-            <span className="result-rays" aria-hidden="true" />
-            <span className="result-ring" aria-hidden="true" />
-            <div className="result-card">
-              <CharacterCard card={drawn} prominent />
-            </div>
-          </div>
-          <button
-            ref={actionRef}
-            type="button"
-            className="action-button"
-            disabled={!isLeader}
-            onClick={confirm}
-          >
-            確定
-          </button>
         </section>
       ) : null}
     </div>

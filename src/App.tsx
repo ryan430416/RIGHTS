@@ -1,14 +1,17 @@
+import { useState } from 'react'
 import { FullscreenButton } from './components/FullscreenButton.tsx'
 import { PortalBackground } from './components/PortalBackground.tsx'
 import { DrawScreen } from './DrawScreen.tsx'
 
 export default function App() {
+  const [dimmed, setDimmed] = useState(false)
+
   return (
     <div className="app">
-      <PortalBackground />
+      <PortalBackground dimmed={dimmed} />
       <FullscreenButton />
       <main className="stage">
-        <DrawScreen />
+        <DrawScreen onDimChange={setDimmed} />
       </main>
     </div>
   )
