@@ -117,20 +117,17 @@ h1 {
 .arena {
   flex: 1;
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
   width: 100%;
   min-height: 0;
-  /* 含字版：標題與傳送門留在背景上半／右側，召喚焦點放底部較乾淨處 */
   padding:
-    clamp(0.5rem, 2vh, 1rem)
+    max(0.75rem, env(safe-area-inset-top))
     clamp(1rem, 4vw, 2rem)
-    max(1rem, env(safe-area-inset-bottom), clamp(1rem, 3.5vh, 2.4rem));
+    max(1rem, env(safe-area-inset-bottom), clamp(1rem, 3vh, 2rem));
 }
 
 .arena-result {
-  align-items: center;
-  justify-content: center;
   padding-bottom: max(0.8rem, env(safe-area-inset-bottom), clamp(0.8rem, 2vh, 1.5rem));
 }
 
@@ -138,19 +135,35 @@ h1 {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: clamp(0.75rem, 1.8vh, 1.2rem);
-  width: min(100%, 360px);
+  gap: clamp(0.7rem, 1.6vh, 1.15rem);
+  width: min(100%, 420px);
 }
 
 .card-slot {
   position: relative;
-  width: min(34vw, 220px);
+  width: min(38vw, 280px);
   aspect-ratio: 525 / 756;
-  perspective: 1200px;
+  perspective: 1400px;
+}
+
+.arena-home .card-slot.is-idle {
+  animation: card-float 4.8s ease-in-out infinite;
 }
 
 .arena-result .card-slot {
-  width: min(68vw, 360px);
+  width: min(68vw, 380px);
+  animation: none;
+}
+
+.card-beckon {
+  position: absolute;
+  inset: -42%;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(circle, rgba(232, 212, 154, 0.28) 0%, rgba(216, 182, 92, 0.1) 38%, transparent 68%);
+  animation: beckon-glow 3.6s ease-in-out infinite;
 }
 
 .card-ambient {
@@ -252,6 +265,14 @@ h1 {
   box-shadow: 0 18px 36px rgba(0, 0, 0, 0.35);
 }
 
+.card-slot.is-idle .card-flipper {
+  box-shadow:
+    0 22px 40px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(232, 212, 154, 0.35),
+    0 0 34px rgba(216, 182, 92, 0.28);
+  animation: idle-sheen 3.6s ease-in-out infinite;
+}
+
 .card-slot.is-flipping .card-flipper {
   animation: summon-flip var(--reveal-ms) cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
 }
@@ -285,11 +306,28 @@ h1 {
   width: 100%;
   height: 100%;
   border-radius: 14px;
+  overflow: hidden;
   background:
-    radial-gradient(circle at 50% 42%, #1a355f 0%, #0f1c36 48%, #08101f 100%);
+    radial-gradient(circle at 50% 38%, #243f6d 0%, #142748 46%, #08101f 100%);
   box-shadow:
-    inset 0 0 0 1px rgba(216, 182, 92, 0.7),
-    0 0 18px rgba(216, 182, 92, 0.12);
+    inset 0 0 0 1px rgba(216, 182, 92, 0.78),
+    inset 0 0 28px rgba(216, 182, 92, 0.08),
+    0 0 22px rgba(216, 182, 92, 0.18);
+}
+
+.card-back::after {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  background: linear-gradient(
+    115deg,
+    transparent 35%,
+    rgba(255, 244, 210, 0.16) 48%,
+    transparent 62%
+  );
+  transform: translateX(-40%);
+  animation: back-shine 5.2s ease-in-out infinite;
+  pointer-events: none;
 }
 
 .card-back-frame {
@@ -328,9 +366,12 @@ h1 {
 .card-back-ring {
   width: 42%;
   aspect-ratio: 1;
-  border: 1.5px solid rgba(216, 182, 92, 0.75);
+  border: 1.5px solid rgba(216, 182, 92, 0.82);
   border-radius: 50%;
-  box-shadow: inset 0 0 0 8px rgba(8, 16, 31, 0.55);
+  box-shadow:
+    inset 0 0 0 8px rgba(8, 16, 31, 0.55),
+    0 0 18px rgba(216, 182, 92, 0.25);
+  animation: ring-breathe 3.8s ease-in-out infinite;
 }
 
 .card-back-cross {
@@ -416,29 +457,38 @@ h1 {
 }
 
 .action-button {
-  min-width: min(260px, 78vw);
-  min-height: 56px;
-  padding: 0.7rem 1.6rem;
+  min-width: min(280px, 80vw);
+  min-height: 58px;
+  padding: 0.75rem 1.7rem;
   border-radius: 12px;
-  border: 1px solid rgba(216, 182, 92, 0.85);
+  border: 1px solid rgba(216, 182, 92, 0.9);
   background:
-    linear-gradient(180deg, rgba(40, 64, 108, 0.55), transparent 42%),
-    linear-gradient(180deg, #142748, #0c1830 70%, #091222);
-  color: #f2e6c4;
-  font-size: clamp(1.1rem, 1.8vw, 1.4rem);
+    linear-gradient(180deg, rgba(56, 84, 136, 0.62), transparent 42%),
+    linear-gradient(180deg, #183056, #0e1d38 70%, #091222);
+  color: #fff3d4;
+  font-size: clamp(1.15rem, 1.9vw, 1.45rem);
   font-weight: 700;
   letter-spacing: 0.18em;
   box-shadow:
-    0 10px 24px rgba(0, 0, 0, 0.28),
-    inset 0 1px 0 rgba(244, 226, 173, 0.18);
+    0 12px 28px rgba(0, 0, 0, 0.32),
+    0 0 24px rgba(216, 182, 92, 0.16),
+    inset 0 1px 0 rgba(244, 226, 173, 0.22);
+}
+
+.action-button-draw:not(:disabled) {
+  animation: cta-pulse 2.8s ease-in-out infinite;
 }
 
 .action-button:hover:not(:disabled) {
-  border-color: #e8d49a;
+  border-color: #f0dfa0;
   background:
-    linear-gradient(180deg, rgba(54, 82, 132, 0.6), transparent 45%),
-    linear-gradient(180deg, #183056, #0e1d38 70%, #0a1426);
-  color: #fff6d8;
+    linear-gradient(180deg, rgba(70, 102, 158, 0.68), transparent 45%),
+    linear-gradient(180deg, #1d3964, #122744 70%, #0a1426);
+  color: #fffaf0;
+  box-shadow:
+    0 14px 30px rgba(0, 0, 0, 0.34),
+    0 0 30px rgba(232, 212, 154, 0.28),
+    inset 0 1px 0 rgba(255, 244, 210, 0.28);
 }
 
 .action-button:active:not(:disabled) {
@@ -475,6 +525,15 @@ h1 {
 .fullscreen-button:hover {
   border-color: rgba(232, 212, 154, 0.8);
   color: #fff6d8;
+}
+
+.summon-invite {
+  margin: 0;
+  color: rgba(242, 230, 196, 0.92);
+  font-size: clamp(0.95rem, 1.6vw, 1.12rem);
+  letter-spacing: 0.22em;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.55), 0 0 16px rgba(216, 182, 92, 0.25);
+  animation: invite-fade 3.2s ease-in-out infinite;
 }
 
 .summon-caption {
@@ -536,17 +595,13 @@ h1 {
   }
 
   .arena {
-    align-items: flex-end;
+    align-items: center;
     justify-content: center;
     padding-bottom: max(1.1rem, env(safe-area-inset-bottom));
   }
 
-  .arena-result {
-    align-items: center;
-  }
-
   .card-slot {
-    width: min(46vw, 200px);
+    width: min(52vw, 240px);
   }
 
   .arena-result .card-slot {
@@ -561,11 +616,11 @@ h1 {
 
 @media (min-width: 901px) and (max-height: 780px) {
   .card-slot {
-    width: min(28vw, 180px);
+    width: min(30vw, 220px);
   }
 
   .summon-focus {
-    gap: 0.7rem;
+    gap: 0.65rem;
   }
 
   .action-button {
@@ -573,10 +628,10 @@ h1 {
   }
 }
 
-/* 矮視窗：卡背再縮小並貼底，讓含字標題留在上方可見區 */
+/* 矮視窗：縮小但仍置中，確保一屏可見 */
 @media (max-height: 720px) {
   .portal-bg-image {
-    object-position: center top;
+    object-position: center 30%;
   }
 
   .portal-bg-floor {
@@ -585,15 +640,20 @@ h1 {
   }
 
   .card-slot {
-    width: min(28vw, 120px);
+    width: min(30vw, 160px);
   }
 
   .arena-result .card-slot {
-    width: min(42vw, 180px);
+    width: min(42vw, 200px);
   }
 
   .summon-focus {
     gap: 0.45rem;
+  }
+
+  .summon-invite {
+    font-size: 0.9rem;
+    letter-spacing: 0.16em;
   }
 
   .action-button {
@@ -606,11 +666,15 @@ h1 {
 
 @media (max-height: 480px) {
   .card-slot {
-    width: min(22vw, 96px);
+    width: min(24vw, 120px);
   }
 
   .action-button {
     min-height: 44px;
+  }
+
+  .summon-invite {
+    display: none;
   }
 }
 
@@ -620,7 +684,13 @@ h1 {
   .card-burst,
   .card-flash,
   .card-spark,
-  .card-flipper {
+  .card-beckon,
+  .card-flipper,
+  .card-slot.is-idle,
+  .card-back::after,
+  .card-back-ring,
+  .action-button-draw,
+  .summon-invite {
     animation: none !important;
     transition: none !important;
   }
@@ -628,7 +698,8 @@ h1 {
   .card-burst,
   .card-flash,
   .card-sparks,
-  .card-rim {
+  .card-rim,
+  .card-beckon {
     display: none;
   }
 
@@ -689,4 +760,47 @@ h1 {
   28% { transform: rotateY(78deg) scale(1.08); filter: brightness(1.25); }
   52% { transform: rotateY(112deg) scale(1.1); filter: brightness(1.4); }
   100% { transform: rotateY(180deg) scale(1); filter: brightness(1); }
+}
+
+@keyframes card-float {
+  0%,
+  100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes beckon-glow {
+  0%,
+  100% { opacity: 0.45; transform: scale(0.92); }
+  50% { opacity: 1; transform: scale(1.06); }
+}
+
+@keyframes idle-sheen {
+  0%,
+  100% { filter: brightness(1); }
+  50% { filter: brightness(1.08); }
+}
+
+@keyframes back-shine {
+  0%,
+  100% { transform: translateX(-55%); opacity: 0; }
+  40% { opacity: 0.85; }
+  70% { transform: translateX(55%); opacity: 0; }
+}
+
+@keyframes ring-breathe {
+  0%,
+  100% { transform: scale(1); opacity: 0.85; }
+  50% { transform: scale(1.06); opacity: 1; }
+}
+
+@keyframes cta-pulse {
+  0%,
+  100% { box-shadow: 0 12px 28px rgba(0, 0, 0, 0.32), 0 0 20px rgba(216, 182, 92, 0.14), inset 0 1px 0 rgba(244, 226, 173, 0.22); }
+  50% { box-shadow: 0 14px 32px rgba(0, 0, 0, 0.34), 0 0 34px rgba(232, 212, 154, 0.32), inset 0 1px 0 rgba(255, 244, 210, 0.28); }
+}
+
+@keyframes invite-fade {
+  0%,
+  100% { opacity: 0.7; }
+  50% { opacity: 1; }
 }

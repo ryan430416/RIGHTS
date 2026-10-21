@@ -141,6 +141,7 @@ export function DrawScreen({
             <div
               className={[
                 'card-slot',
+                phase === 'home' ? 'is-idle' : '',
                 flipping ? 'is-flipping' : '',
                 revealed && drawn ? 'is-revealed' : '',
               ]
@@ -148,11 +149,14 @@ export function DrawScreen({
                 .join(' ')}
             >
               {phase === 'home' || flipping ? (
-                <span className={flipping ? 'card-ambient is-summoning' : 'card-ambient'} aria-hidden="true">
-                  {AMBIENT.map((mote) => (
-                    <span key={mote} className="card-ambient-mote" style={{ '--i': mote } as CSSProperties} />
-                  ))}
-                </span>
+                <>
+                  {phase === 'home' ? <span className="card-beckon" aria-hidden="true" /> : null}
+                  <span className={flipping ? 'card-ambient is-summoning' : 'card-ambient'} aria-hidden="true">
+                    {AMBIENT.map((mote) => (
+                      <span key={mote} className="card-ambient-mote" style={{ '--i': mote } as CSSProperties} />
+                    ))}
+                  </span>
+                </>
               ) : null}
               {flipping ? (
                 <>
@@ -177,15 +181,18 @@ export function DrawScreen({
             </div>
 
             {phase === 'home' ? (
-              <button
-                ref={actionRef}
-                type="button"
-                className="action-button"
-                disabled={!ready || !isLeader}
-                onClick={draw}
-              >
-                {ready ? '開始抽卡' : '載入素材中…'}
-              </button>
+              <>
+                <p className="summon-invite">觸碰權流・召喚角色</p>
+                <button
+                  ref={actionRef}
+                  type="button"
+                  className="action-button action-button-draw"
+                  disabled={!ready || !isLeader}
+                  onClick={draw}
+                >
+                  {ready ? '開始抽卡' : '載入素材中…'}
+                </button>
+              </>
             ) : null}
 
             {phase === 'summoning' ? <p className="summon-caption">權流匯聚中…</p> : null}
