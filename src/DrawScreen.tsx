@@ -26,8 +26,8 @@ type DrawScreenProps = {
 }
 
 const browserProgressStore = localProgressStore()
-const AMBIENT = [0, 1, 2, 3, 4, 5]
-const SPARKS = [0, 1, 2, 3, 4, 5, 6, 7]
+const AMBIENT = [0, 1, 2, 3, 4, 5, 6, 7]
+const SPARKS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
 
 export function DrawScreen({
   random,
@@ -129,16 +129,17 @@ export function DrawScreen({
       </p>
 
       {isLeader ? (
-        <>
+        <div className="shell">
           <header className={`brand-panel ${phase === 'result' ? 'is-faded' : ''}`}>
             <p className="brand-event">{TITLE.event}</p>
             <h1 className="brand-main">{TITLE.main}</h1>
             <p className="brand-sub">{TITLE.chinese}</p>
-            <p className="brand-en">{TITLE.english}</p>
+            <p className="brand-en">
+              TRACE THE SOURCE. <span className="nobr">KNOW YOUR RIGHTS.</span>
+            </p>
 
             {phase === 'home' ? (
               <div className="brand-actions">
-                <p className="summon-invite">觸碰權流・召喚角色</p>
                 <button
                   ref={actionRef}
                   type="button"
@@ -183,8 +184,8 @@ export function DrawScreen({
                 {flipping ? (
                   <>
                     <span className="card-burst" aria-hidden="true" />
-                    <span className="card-flash" aria-hidden="true" />
                     <span className="card-rim" aria-hidden="true" />
+                    <span className="card-flash" aria-hidden="true" />
                     <span className="card-sparks" aria-hidden="true">
                       {SPARKS.map((spark) => (
                         <span key={spark} className="card-spark" style={{ '--i': spark } as CSSProperties} />
@@ -215,7 +216,7 @@ export function DrawScreen({
               ) : null}
             </div>
           </section>
-        </>
+        </div>
       ) : null}
     </div>
   )
