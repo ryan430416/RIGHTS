@@ -28,6 +28,7 @@ type DrawScreenProps = {
 const browserProgressStore = localProgressStore()
 const AMBIENT = [0, 1, 2, 3, 4, 5, 6, 7]
 const SPARKS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+const CTA_MOTES = [0, 1, 2, 3, 4]
 
 export function DrawScreen({
   random,
@@ -140,14 +141,43 @@ export function DrawScreen({
 
             {phase === 'home' ? (
               <div className="brand-actions">
+                <p className="draw-prompt">你的守護角色，會是誰？</p>
                 <button
                   ref={actionRef}
                   type="button"
                   className="action-button action-button-draw"
                   disabled={!ready || !isLeader}
+                  aria-label={ready ? '開始抽卡' : '召喚中…'}
                   onClick={draw}
                 >
-                  {ready ? '開始抽卡' : '載入素材中…'}
+                  <span className="draw-cta-aura" aria-hidden="true" />
+                  <span className="draw-cta-plate" aria-hidden="true">
+                    <span className="draw-cta-frame" />
+                    <span className="draw-cta-frame draw-cta-frame-inner" />
+                    <span className="draw-cta-corner draw-cta-corner-nw" />
+                    <span className="draw-cta-corner draw-cta-corner-ne" />
+                    <span className="draw-cta-corner draw-cta-corner-sw" />
+                    <span className="draw-cta-corner draw-cta-corner-se" />
+                    <span className="draw-cta-sheen" />
+                    <span className="draw-cta-motes">
+                      {CTA_MOTES.map((mote) => (
+                        <span
+                          key={mote}
+                          className="draw-cta-mote"
+                          style={{ '--i': mote } as CSSProperties}
+                        />
+                      ))}
+                    </span>
+                  </span>
+                  <span className="draw-cta-ripple" aria-hidden="true" />
+                  <span className="draw-cta-copy">
+                    <span className="draw-cta-label">{ready ? '開始抽卡' : '召喚中…'}</span>
+                    {ready ? (
+                      <span className="draw-cta-sub" aria-hidden="true">
+                        TAP TO DRAW
+                      </span>
+                    ) : null}
+                  </span>
                 </button>
               </div>
             ) : null}

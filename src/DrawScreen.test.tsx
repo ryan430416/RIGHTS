@@ -37,12 +37,16 @@ describe('DrawScreen', () => {
     expect(screen.getByText(/KNOW YOUR RIGHTS/)).toBeInTheDocument()
     expect(screen.getAllByRole('heading', { name: '權流・溯源' })).toHaveLength(1)
     expect(screen.queryByText('觸碰權流・召喚角色')).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /開始抽卡|載入素材/ })).toBeInTheDocument()
+    expect(screen.getByText('你的守護角色，會是誰？')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /開始抽卡|召喚中/ })).toBeInTheDocument()
     expect(document.querySelector('.card-back')).not.toBeNull()
     expect(document.querySelector('.card-back-cross')).toBeNull()
     expect(document.querySelector('.card-back-sigil')).not.toBeNull()
     await flushReady()
-    expect(screen.getByRole('button', { name: '開始抽卡' })).toBeEnabled()
+    const start = screen.getByRole('button', { name: '開始抽卡' })
+    expect(start).toBeEnabled()
+    expect(start.textContent).toContain('TAP TO DRAW')
+    expect(document.querySelector('.draw-cta-plate')).not.toBeNull()
   })
 
   it('locks during the summon and reveals the committed card in place', async () => {
