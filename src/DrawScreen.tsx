@@ -130,7 +130,7 @@ export function DrawScreen({
 
       {isLeader ? (
         <div className="shell">
-          <header className={`brand-panel ${phase === 'result' ? 'is-faded' : ''}`}>
+          <header className={`brand-panel ${phase !== 'home' ? 'is-faded' : ''}`}>
             <p className="brand-event">{TITLE.event}</p>
             <h1 className="brand-main">{TITLE.main}</h1>
             <p className="brand-sub">{TITLE.chinese}</p>
@@ -151,8 +151,6 @@ export function DrawScreen({
                 </button>
               </div>
             ) : null}
-
-            {phase === 'summoning' ? <p className="summon-caption">權流匯聚中…</p> : null}
           </header>
 
           <section
@@ -161,20 +159,30 @@ export function DrawScreen({
             aria-busy={flipping || undefined}
           >
             <div className="summon-focus">
+              {phase === 'summoning' ? <p className="summon-caption">權流匯聚中…</p> : null}
+
               <div
                 className={[
                   'card-slot',
                   phase === 'home' ? 'is-idle' : '',
                   flipping ? 'is-flipping' : '',
                   revealed && drawn ? 'is-revealed' : '',
+                  phase === 'result' ? 'is-celebrate' : '',
                 ]
                   .filter(Boolean)
                   .join(' ')}
               >
-                {phase === 'home' || flipping ? (
+                {phase === 'home' || flipping || phase === 'result' ? (
                   <>
-                    {phase === 'home' ? <span className="card-beckon" aria-hidden="true" /> : null}
-                    <span className={flipping ? 'card-ambient is-summoning' : 'card-ambient'} aria-hidden="true">
+                    {phase === 'home' || phase === 'result' ? (
+                      <span className={phase === 'result' ? 'card-beckon is-result' : 'card-beckon'} aria-hidden="true" />
+                    ) : null}
+                    <span
+                      className={
+                        flipping ? 'card-ambient is-summoning' : phase === 'result' ? 'card-ambient is-result' : 'card-ambient'
+                      }
+                      aria-hidden="true"
+                    >
                       {AMBIENT.map((mote) => (
                         <span key={mote} className="card-ambient-mote" style={{ '--i': mote } as CSSProperties} />
                       ))}
@@ -193,6 +201,7 @@ export function DrawScreen({
                     </span>
                   </>
                 ) : null}
+                {phase === 'result' ? <span className="card-result-ring" aria-hidden="true" /> : null}
                 <div className="card-flipper">
                   <div className="card-face card-face-back">
                     <CardBack />
@@ -204,15 +213,18 @@ export function DrawScreen({
               </div>
 
               {phase === 'result' && drawn ? (
-                <button
-                  ref={actionRef}
-                  type="button"
-                  className="action-button"
-                  disabled={!isLeader}
-                  onClick={confirmResult}
-                >
-                  確定
-                </button>
+                <>
+                  <p className="result-name">{drawn.name}</p>
+                  <button
+                    ref={actionRef}
+                    type="button"
+                    className="action-button"
+                    disabled={!isLeader}
+                    onClick={confirmResult}
+                  >
+                    確定
+                  </button>
+                </>
               ) : null}
             </div>
           </section>

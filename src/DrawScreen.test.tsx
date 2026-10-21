@@ -68,7 +68,10 @@ describe('DrawScreen', () => {
     })
 
     expect(screen.getByRole('img', { name: '守護騎士' })).toBeInTheDocument()
+    expect(document.querySelector('.result-name')?.textContent).toBe('守護騎士')
     expect(screen.getByRole('button', { name: '確定' })).toBeInTheDocument()
+    expect(document.querySelector('.card-slot.is-celebrate')).not.toBeNull()
+    expect(document.querySelector('.arena-result')).not.toBeNull()
   })
 
   it('returns to the summon home after confirm', async () => {
