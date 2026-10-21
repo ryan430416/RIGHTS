@@ -1,4 +1,4 @@
-import { CARD_DEFINITIONS, VISUALS } from '../config/cards.ts'
+import { CARD_DEFINITIONS } from '../config/cards.ts'
 
 export function preloadImages(urls: readonly string[]): Promise<void> {
   return Promise.all(
@@ -26,9 +26,5 @@ export function preloadImages(urls: readonly string[]): Promise<void> {
 }
 
 export function preloadSiteAssets(): Promise<void> {
-  return preloadImages([
-    VISUALS.hero,
-    VISUALS.banner,
-    ...CARD_DEFINITIONS.map((card) => card.src),
-  ])
+  return preloadImages(CARD_DEFINITIONS.map((card) => card.src))
 }

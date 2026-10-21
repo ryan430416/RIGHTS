@@ -1,17 +1,18 @@
-import { useState } from 'react'
 import { FullscreenButton } from './components/FullscreenButton.tsx'
-import { PortalBackground } from './components/PortalBackground.tsx'
+import { SceneBackground } from './components/scene/SceneBackground.tsx'
 import { DrawScreen } from './DrawScreen.tsx'
+import { useState } from 'react'
+import type { DrawPhase } from './lib/draw.ts'
 
 export default function App() {
-  const [dimmed, setDimmed] = useState(false)
+  const [phase, setPhase] = useState<DrawPhase>('home')
 
   return (
     <div className="app">
-      <PortalBackground dimmed={dimmed} />
+      <SceneBackground phase={phase} />
       <FullscreenButton />
       <main className="stage">
-        <DrawScreen onDimChange={setDimmed} />
+        <DrawScreen onPhaseChange={setPhase} />
       </main>
     </div>
   )

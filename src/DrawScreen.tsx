@@ -22,12 +22,12 @@ type DrawScreenProps = {
   store?: ProgressStore
   tabId?: string
   forceLeader?: boolean
-  onDimChange?: (dimmed: boolean) => void
+  onPhaseChange?: (phase: DrawPhase) => void
 }
 
 const browserProgressStore = localProgressStore()
-const AMBIENT = [0, 1, 2, 3, 4, 5, 6, 7]
-const SPARKS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+const AMBIENT = [0, 1, 2, 3, 4, 5]
+const SPARKS = [0, 1, 2, 3, 4, 5, 6, 7]
 
 export function DrawScreen({
   random,
@@ -35,7 +35,7 @@ export function DrawScreen({
   store = browserProgressStore,
   tabId,
   forceLeader,
-  onDimChange,
+  onPhaseChange,
 }: DrawScreenProps) {
   const [progress, setProgress] = useState<DrawProgress>(() => store.read() ?? createProgress(random))
   const [phase, setPhase] = useState<DrawPhase>(() => (progress.result ? 'result' : 'home'))
@@ -58,8 +58,8 @@ export function DrawScreen({
   }, [progress, store])
 
   useEffect(() => {
-    onDimChange?.(phase === 'result')
-  }, [phase, onDimChange])
+    onPhaseChange?.(phase)
+  }, [phase, onPhaseChange])
 
   useEffect(() => {
     let cancelled = false
@@ -116,7 +116,7 @@ export function DrawScreen({
   const style = { '--reveal-ms': `${duration}ms` } as CSSProperties
 
   return (
-    <div className={phase === 'result' ? 'draw is-result' : 'draw'} style={style}>
+    <div className={`draw draw-${phase}`} style={style}>
       {!isLeader ? (
         <div className="tab-lock" role="status">
           <p>抽卡已在另一個分頁進行中。</p>
@@ -124,64 +124,20 @@ export function DrawScreen({
         </div>
       ) : null}
 
-      <h1 className="visually-hidden">{TITLE.main}</h1>
-      <p className="visually-hidden">{TITLE.chinese}</p>
-      <p className="visually-hidden">{TITLE.english}</p>
       <p className="visually-hidden" aria-live="polite">
         {phase === 'result' && drawn ? `已抽出${drawn.name}` : ''}
       </p>
 
       {isLeader ? (
-        <section
-          className={`arena arena-${phase}`}
-          aria-label={phase === 'result' ? '抽卡結果' : '抽卡召喚'}
-          aria-busy={flipping || undefined}
-        >
-          <div className="summon-focus">
-            <div
-              className={[
-                'card-slot',
-                phase === 'home' ? 'is-idle' : '',
-                flipping ? 'is-flipping' : '',
-                revealed && drawn ? 'is-revealed' : '',
-              ]
-                .filter(Boolean)
-                .join(' ')}
-            >
-              {phase === 'home' || flipping ? (
-                <>
-                  {phase === 'home' ? <span className="card-beckon" aria-hidden="true" /> : null}
-                  <span className={flipping ? 'card-ambient is-summoning' : 'card-ambient'} aria-hidden="true">
-                    {AMBIENT.map((mote) => (
-                      <span key={mote} className="card-ambient-mote" style={{ '--i': mote } as CSSProperties} />
-                    ))}
-                  </span>
-                </>
-              ) : null}
-              {flipping ? (
-                <>
-                  <span className="card-burst" aria-hidden="true" />
-                  <span className="card-flash" aria-hidden="true" />
-                  <span className="card-rim" aria-hidden="true" />
-                  <span className="card-sparks" aria-hidden="true">
-                    {SPARKS.map((spark) => (
-                      <span key={spark} className="card-spark" style={{ '--i': spark } as CSSProperties} />
-                    ))}
-                  </span>
-                </>
-              ) : null}
-              <div className="card-flipper">
-                <div className="card-face card-face-back">
-                  <CardBack />
-                </div>
-                <div className="card-face card-face-front">
-                  {drawn ? <CharacterCard card={drawn} prominent /> : null}
-                </div>
-              </div>
-            </div>
+        <>
+          <header className={`brand-panel ${phase === 'result' ? 'is-faded' : ''}`}>
+            <p className="brand-event">{TITLE.event}</p>
+            <h1 className="brand-main">{TITLE.main}</h1>
+            <p className="brand-sub">{TITLE.chinese}</p>
+            <p className="brand-en">{TITLE.english}</p>
 
             {phase === 'home' ? (
-              <>
+              <div className="brand-actions">
                 <p className="summon-invite">觸碰權流・召喚角色</p>
                 <button
                   ref={actionRef}
@@ -192,24 +148,74 @@ export function DrawScreen({
                 >
                   {ready ? '開始抽卡' : '載入素材中…'}
                 </button>
-              </>
+              </div>
             ) : null}
 
             {phase === 'summoning' ? <p className="summon-caption">權流匯聚中…</p> : null}
+          </header>
 
-            {phase === 'result' && drawn ? (
-              <button
-                ref={actionRef}
-                type="button"
-                className="action-button"
-                disabled={!isLeader}
-                onClick={confirmResult}
+          <section
+            className={`arena arena-${phase}`}
+            aria-label={phase === 'result' ? '抽卡結果' : '抽卡召喚'}
+            aria-busy={flipping || undefined}
+          >
+            <div className="summon-focus">
+              <div
+                className={[
+                  'card-slot',
+                  phase === 'home' ? 'is-idle' : '',
+                  flipping ? 'is-flipping' : '',
+                  revealed && drawn ? 'is-revealed' : '',
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
               >
-                確定
-              </button>
-            ) : null}
-          </div>
-        </section>
+                {phase === 'home' || flipping ? (
+                  <>
+                    {phase === 'home' ? <span className="card-beckon" aria-hidden="true" /> : null}
+                    <span className={flipping ? 'card-ambient is-summoning' : 'card-ambient'} aria-hidden="true">
+                      {AMBIENT.map((mote) => (
+                        <span key={mote} className="card-ambient-mote" style={{ '--i': mote } as CSSProperties} />
+                      ))}
+                    </span>
+                  </>
+                ) : null}
+                {flipping ? (
+                  <>
+                    <span className="card-burst" aria-hidden="true" />
+                    <span className="card-flash" aria-hidden="true" />
+                    <span className="card-rim" aria-hidden="true" />
+                    <span className="card-sparks" aria-hidden="true">
+                      {SPARKS.map((spark) => (
+                        <span key={spark} className="card-spark" style={{ '--i': spark } as CSSProperties} />
+                      ))}
+                    </span>
+                  </>
+                ) : null}
+                <div className="card-flipper">
+                  <div className="card-face card-face-back">
+                    <CardBack />
+                  </div>
+                  <div className="card-face card-face-front">
+                    {drawn ? <CharacterCard card={drawn} prominent /> : null}
+                  </div>
+                </div>
+              </div>
+
+              {phase === 'result' && drawn ? (
+                <button
+                  ref={actionRef}
+                  type="button"
+                  className="action-button"
+                  disabled={!isLeader}
+                  onClick={confirmResult}
+                >
+                  確定
+                </button>
+              ) : null}
+            </div>
+          </section>
+        </>
       ) : null}
     </div>
   )

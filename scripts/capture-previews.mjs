@@ -25,24 +25,30 @@ async function shoot(name, viewport, isMobile = false) {
     const btn = document.querySelector('.action-button')
     return btn && !btn.disabled && btn.textContent?.includes('開始抽卡')
   })
-  await page.waitForTimeout(400)
+  // allow WebGL scene a moment to paint
+  await page.waitForTimeout(1200)
   const file = path.join(outDir, name)
   await page.screenshot({ path: file, fullPage: false })
+
   const metrics = await page.evaluate(() => {
-    const btn = document.querySelector('.action-button')
-    const slot = document.querySelector('.card-slot')
-    const img = document.querySelector('.portal-bg-image')
-    const box = (el) => {
-      const r = el.getBoundingClientRect()
-      return { y: Math.round(r.y), bottom: Math.round(r.bottom), w: Math.round(r.width) }
-    }
+    const heroBg = getComputedStyle(document.querySelector('.portal-bg-image') || document.body).backgroundImage
+    const imgTags = [...document.images].map((img) => img.currentSrc)
+    const canvas = document.querySelector('canvas')
+    const fallback = document.querySelector('.ruin-fallback')
     return {
-      bg: img?.currentSrc || '',
-      btn: box(btn),
-      slot: box(slot),
-      visibleH1: document.querySelectorAll('h1:not(.visually-hidden)').length,
-      titleClear: slot.getBoundingClientRect().y > innerHeight * 0.4,
-      btnInView: btn.getBoundingClientRect().bottom <= innerHeight,
+      titles: [...document.querySelectorAll('h1')].map((el) => el.textContent),
+      hasCanvas: Boolean(canvas),
+      hasFallback: Boolean(fallback),
+      heroImgTags: imgTags.filter((src) => /hero|portal|banner|visuals/i.test(src)),
+      usesPortalBgClass: Boolean(document.querySelector('.portal-bg-image')),
+      btnInView: (() => {
+        const btn = document.querySelector('.action-button')
+        if (!btn) return false
+        const r = btn.getBoundingClientRect()
+        return r.bottom <= innerHeight && r.top >= 0
+      })(),
+      scrollWidthOk: document.documentElement.scrollWidth <= innerWidth + 1,
+      heroBg,
     }
   })
   console.log(name, metrics)
@@ -53,7 +59,6 @@ async function shoot(name, viewport, isMobile = false) {
 await shoot('desktop-home.png', { width: 1440, height: 900 }, false)
 await shoot('mobile-home.png', { width: 390, height: 844 }, true)
 
-// result screen on desktop
 {
   const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 })
   const page = await context.newPage()
@@ -68,7 +73,7 @@ await shoot('mobile-home.png', { width: 390, height: 844 }, true)
   })
   await page.click('.action-button')
   await page.waitForFunction(() => document.querySelector('.arena-result'))
-  await page.waitForTimeout(1900)
+  await page.waitForTimeout(2000)
   await page.screenshot({ path: path.join(outDir, 'desktop-result.png'), fullPage: false })
   console.log('desktop-result.png ok')
   await context.close()

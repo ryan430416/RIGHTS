@@ -28,14 +28,17 @@ describe('DrawScreen', () => {
     localStorage.clear()
   })
 
-  it('shows the summon stage with a start button and no duplicate visible titles', async () => {
+  it('shows a single brand block with start button and card back', async () => {
     render(<DrawScreen random={identity} store={memoryProgressStore()} forceLeader tabId="home" />)
-    expect(screen.getByRole('heading', { name: '權流・溯源', hidden: true })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '權流・溯源' })).toBeInTheDocument()
+    expect(screen.getByText('學生權益週')).toBeInTheDocument()
+    expect(screen.getByText('溯其源・知其權')).toBeInTheDocument()
+    expect(screen.getByText('TRACE THE SOURCE. KNOW YOUR RIGHTS.')).toBeInTheDocument()
+    expect(screen.getAllByRole('heading', { name: '權流・溯源' })).toHaveLength(1)
     expect(screen.getByRole('button', { name: /開始抽卡|載入素材/ })).toBeInTheDocument()
     expect(screen.getByText('觸碰權流・召喚角色')).toBeInTheDocument()
     expect(document.querySelector('.card-back')).not.toBeNull()
     expect(document.querySelector('.card-slot.is-idle')).not.toBeNull()
-    expect(document.querySelectorAll('h1:not(.visually-hidden)')).toHaveLength(0)
     await flushReady()
     expect(screen.getByRole('button', { name: '開始抽卡' })).toBeEnabled()
   })

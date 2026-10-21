@@ -16,16 +16,8 @@ export const CARD_DEFINITIONS: readonly CardDefinition[] = [
   { id: 'D', src: '/cards/card-d.png', name: '知識法師' },
 ]
 
-/**
- * 活動主視覺路徑。之後可替換 public/visuals/ 內檔案，或改這裡的路徑。
- */
-export const VISUALS = {
-  /** 高解析含字大背板（3070×2050） */
-  hero: '/visuals/hero.png',
-  banner: '/visuals/banner.jpg',
-} as const
-
 export const TITLE = {
+  event: '學生權益週',
   main: '權流・溯源',
   chinese: '溯其源・知其權',
   english: 'TRACE THE SOURCE. KNOW YOUR RIGHTS.',

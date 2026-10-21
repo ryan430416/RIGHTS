@@ -1,8 +1,8 @@
 # 權流・溯源｜學生權益週抽卡
 
-現場用的純前端抽卡網站：開始抽卡 → 卡背翻牌召喚 → 顯示角色卡 → 確定回到召喚首頁。
+現場用的純前端抽卡網站：開始抽卡 → 卡背翻牌召喚 → 顯示角色卡 → 確定回到首頁。
 
-主視覺 `public/visuals/hero.png` 為含字高解析大背板（3070×2050），畫面不再重複疊加主標與副標。
+背景以 Three.js／WebGL **程式生成**哥德遺跡、尖拱傳送門、旋渦與金藍光流；參考海報／橫幅／大背板僅作風格依據，**不會**當作整頁背景圖。WebGL 不可用時改以 SVG／CSS 簡化場景。
 
 ## 啟動預覽
 
@@ -18,12 +18,10 @@ npm run build
 npm run preview
 ```
 
-## 替換素材
+## 替換角色卡
 
 | 用途 | 路徑 |
 | --- | --- |
-| 主視覺背景 | `public/visuals/hero.png`（3070×2050） |
-| 橫幅（備用） | `public/visuals/banner.jpg` |
 | 守護騎士 (A) | `public/cards/card-a.png` |
 | 巡境遊俠 (B) | `public/cards/card-b.png` |
 | 解謎盜賊 (C) | `public/cards/card-c.png` |
